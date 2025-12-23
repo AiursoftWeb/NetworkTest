@@ -1,4 +1,5 @@
 using Aiursoft.CommandFramework;
+using Aiursoft.NetworkTest;
 
 namespace Aiursoft.NetworkTest.Tests;
 
@@ -35,7 +36,7 @@ public class IntegrationTests
         var result = await _program.TestRunAsync([], defaultOption: OptionsProvider.ServerOption);
         Assert.AreEqual(1, result.ProgramReturn);
     }
-    
+
     [TestMethod]
     public async Task InvokePing()
     {
@@ -49,7 +50,7 @@ public class IntegrationTests
         // Assert
         Assert.AreEqual(0, result.ProgramReturn);
     }
-    
+
     [TestMethod]
     public async Task InvokePingFailed()
     {

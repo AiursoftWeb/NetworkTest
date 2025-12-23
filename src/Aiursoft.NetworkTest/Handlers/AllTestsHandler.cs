@@ -32,14 +32,17 @@ public class AllTestsHandler : ExecutableCommandHandlerBuilder
         var testScores = new Dictionary<string, double>();
 
         // Run all available tests
-        // Currently only domestic latency is implemented
         var domesticLatencyTest = host.Services.GetRequiredService<DomesticLatencyTestService>();
         var domesticScore = await domesticLatencyTest.RunTestAsync(verbose);
         testScores[domesticLatencyTest.TestName] = domesticScore;
 
+        var internationalLatencyTest = host.Services.GetRequiredService<InternationalLatencyTestService>();
+        var internationalScore = await internationalLatencyTest.RunTestAsync(verbose);
+        testScores[internationalLatencyTest.TestName] = internationalScore;
+
         // TODO: Add more tests here as they are implemented
         // var domesticSpeedTest = host.Services.GetRequiredService<DomesticSpeedTestService>();
-        // var domesticSpeedScore = await domesticSpeedTest.RunTestAsync();
+        // var domesticSpeedScore = await domesticSpeedTest.RunTestAsync(verbose);
         // testScores[domesticSpeedTest.TestName] = domesticSpeedScore;
 
         // Calculate overall score

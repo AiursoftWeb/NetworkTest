@@ -11,11 +11,11 @@ public class QualityHandler : NavigationCommandHandlerBuilder
     protected override CommandHandlerBuilder[] GetSubCommandHandlers() =>
     [
         new DomesticLatencyHandler(),
+        new InternationalLatencyHandler(),
         new AllTestsHandler()
         // Future tests will be added here:
         // new DomesticSpeedHandler(),
         // new DomesticPacketLossHandler(),
-        // new InternationalLatencyHandler(),
         // new InternationalSpeedHandler(),
         // new InternationalPacketLossHandler()
     ];

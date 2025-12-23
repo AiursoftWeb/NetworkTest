@@ -4,28 +4,28 @@ using Microsoft.Extensions.Http;
 
 namespace Aiursoft.NetworkTest.Services;
 
-public class DomesticLatencyTestService : ITestService
+public class InternationalLatencyTestService : ITestService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly TableRenderer _tableRenderer;
     private static readonly Random _random = new();
 
-    public string TestName => "Domestic Web Latency";
+    public string TestName => "International Web Latency";
 
     private readonly List<(string Name, string Url)> _endpoints = new()
     {
-        ("Xiaomi (MIUI)", "http://connect.rom.miui.com/generate_204"),
-        ("Huawei (EMUI)", "http://connectivitycheck.platform.hicloud.com/generate_204"),
-        ("Vivo Check", "http://wifi.vivo.com.cn/generate_204"),
-        ("Aliyun DNS", "https://dns.alidns.com/resolve?name=www.taobao.com&type=1"),
-        ("Tencent DNS", "https://doh.pub/resolve?name=www.qq.com"),
-        ("360 DNS", "https://doh.360.cn/resolve?name=www.360.cn"),
-        ("Baidu CDN", "https://www.baidu.com/favicon.ico"),
-        ("Bilibili CDN", "https://i0.hdslb.com/bfs/face/member/noface.jpg"),
-        ("V2EX 204", "https://www.v2ex.com/generate_204"),
+        ("Cloudflare Trace", "https://www.cloudflare.com/cdn-cgi/trace"),
+        ("Google Gen204", "https://www.google.com/generate_204"),
+        ("MS Connect Test", "http://www.msftconnecttest.com/connecttest.txt"),
+        ("Apple Captive", "http://captive.apple.com/hotspot-detect.html"),
+        ("AWS CheckIP", "https://checkip.amazonaws.com"),
+        ("Gstatic Gen204", "http://connectivitycheck.gstatic.com/generate_204"),
+        ("Firefox Detect", "http://detectportal.firefox.com/success.txt"),
+        ("GitHub Zen", "https://api.github.com/zen"),
+        ("Cloudflare DNS", "https://1.0.0.1/")
     };
 
-    public DomesticLatencyTestService(
+    public InternationalLatencyTestService(
         IHttpClientFactory httpClientFactory,
         TableRenderer tableRenderer)
     {
@@ -50,12 +50,12 @@ public class DomesticLatencyTestService : ITestService
         // Render final table
         _tableRenderer.RenderTestResultsTable(results);
 
-        // Calculate score: 130 - average latency, then deduct 5 points per failure
+        // Calculate score: 170 - average latency, then deduct 5 points per failure
         var overallAverageLatency = results.Average(r => r.AverageLatency);
         var totalFailures = results.Sum(r => r.FailedCount);
         var totalRequests = _endpoints.Count * 6;  // Total number of requests attempted
         var successfulRequests = totalRequests - totalFailures;
-        var baseScore = Math.Max(0, Math.Min(100, 130 - overallAverageLatency));
+        var baseScore = Math.Max(0, Math.Min(100, 170 - overallAverageLatency));
         var score = Math.Max(0, baseScore - (totalFailures * 5));
 
         // Display scoring breakdown
@@ -64,7 +64,7 @@ public class DomesticLatencyTestService : ITestService
         Console.WriteLine($"  - Average Latency: {overallAverageLatency:F2} ms");
         Console.WriteLine($"  - Successful Requests: {successfulRequests}/{totalRequests}");
         Console.WriteLine($"  - Failed Requests: {totalFailures}");
-        Console.WriteLine($"  - Base Score (130 - avg latency): {baseScore:F2}");
+        Console.WriteLine($"  - Base Score (170 - avg latency): {baseScore:F2}");
         if (totalFailures > 0)
         {
             Console.WriteLine($"  - Failure Penalty: -{totalFailures * 5} ({totalFailures} × 5)");
@@ -135,7 +135,7 @@ public class DomesticLatencyTestService : ITestService
 
     private async Task<double> MeasureLatencyAsync(string url)
     {
-        var client = _httpClientFactory.CreateClient("DomesticQualityTest");
+        var client = _httpClientFactory.CreateClient("InternationalQualityTest");
         var stopwatch = Stopwatch.StartNew();
 
         var request = new HttpRequestMessage(HttpMethod.Head, url);
