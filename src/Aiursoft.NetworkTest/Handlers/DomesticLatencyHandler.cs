@@ -30,7 +30,7 @@ public class DomesticLatencyHandler : ExecutableCommandHandlerBuilder
         await host.StartAsync();
 
         var testService = host.Services.GetRequiredService<DomesticLatencyTestService>();
-        await testService.RunTestAsync();
+        await testService.RunTestAsync(verbose);
 
         await host.StopAsync();
     }

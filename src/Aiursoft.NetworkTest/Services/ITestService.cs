@@ -10,7 +10,8 @@ public interface ITestService
     /// Runs the test and returns a score between 0 and 100.
     /// The test should render a real-time table showing progress.
     /// </summary>
-    Task<double> RunTestAsync();
+    /// <param name="verbose">Whether to show detailed logging</param>
+    Task<double> RunTestAsync(bool verbose = false);
 
     /// <summary>
     /// Gets the display name of this test.

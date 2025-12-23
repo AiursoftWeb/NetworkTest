@@ -19,14 +19,14 @@ public class DomesticLatencyTestService : ITestService
         ("Taobao", "https://www.taobao.com/"),
         ("Bilibili", "https://www.bilibili.com/"),
         ("JD.com", "https://www.jd.com/"),
-        ("Douyin", "https://www.douyin.com/"),
+        ("Kuaishou", "https://www.kuaishou.com/"),
         ("Zhihu", "https://www.zhihu.com/"),
         ("QQ", "https://www.qq.com/"),
         ("Xiaohongshu", "https://www.xiaohongshu.com/"),
         ("Tmall", "https://www.tmall.com/"),
         ("Weibo", "https://www.weibo.com/"),
         ("NetEase", "https://www.163.com/"),
-        ("Sina", "https://www.sina.com/"),
+        ("Weibo", "https://www.weibo.com/"),
         ("Zhihu", "https://www.zhihu.com/"),
     };
 
@@ -38,17 +38,17 @@ public class DomesticLatencyTestService : ITestService
         _tableRenderer = tableRenderer;
     }
 
-    public async Task<double> RunTestAsync()
+    public async Task<double> RunTestAsync(bool verbose = false)
     {
         Console.WriteLine();
         Console.WriteLine($"=== {TestName} Test ===");
-        Console.WriteLine($"Testing {_endpoints.Count} endpoints with 6 requests each...");
+        Console.WriteLine($"Testing {_endpoints.Count} endpoints with 3 requests each...");
         Console.WriteLine();
 
         var results = new List<EndpointTestResult>();
 
         // Test all endpoints in parallel
-        var tasks = _endpoints.Select(endpoint => TestEndpointAsync(endpoint.Name, endpoint.Url));
+        var tasks = _endpoints.Select(endpoint => TestEndpointAsync(endpoint.Name, endpoint.Url, verbose));
         var endpointResults = await Task.WhenAll(tasks);
         results.AddRange(endpointResults);
 
@@ -80,7 +80,7 @@ public class DomesticLatencyTestService : ITestService
         return score;
     }
 
-    private async Task<EndpointTestResult> TestEndpointAsync(string name, string url)
+    private async Task<EndpointTestResult> TestEndpointAsync(string name, string url, bool verbose)
     {
         var latencies = new List<double>();
         var failedCount = 0;
@@ -93,6 +93,17 @@ public class DomesticLatencyTestService : ITestService
                 var latency = await MeasureLatencyAsync(url);
                 latencies.Add(latency);
 
+                // Log success in verbose mode with colorful output
+                if (verbose)
+                {
+                    Console.Write($"[{name}] Request {i + 1}: ");
+                    var color = GetLatencyColor(latency);
+                    Console.ForegroundColor = color;
+                    Console.Write($"{latency:F2} ms");
+                    Console.ResetColor();
+                    Console.WriteLine(" ✓");
+                }
+
                 // Random delay between 2-5 seconds (except for the last request)
                 if (i < requestCount - 1)
                 {
@@ -100,10 +111,13 @@ public class DomesticLatencyTestService : ITestService
                     await Task.Delay(delayMs);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Don't log failures, just count them
-                // Failed requests are not included in latency statistics
+                // Always log failures (both verbose and non-verbose)
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[{name}] Request {i + 1}: Failed - {ex.Message}");
+                Console.ResetColor();
+
                 failedCount++;
 
                 // Random delay between 2-5 seconds (except for the last request)
@@ -136,5 +150,20 @@ public class DomesticLatencyTestService : ITestService
 
         // Don't check for success - we just want to measure latency
         return stopwatch.Elapsed.TotalMilliseconds;
+    }
+
+    private ConsoleColor GetLatencyColor(double latency)
+    {
+        return latency switch
+        {
+            < 30 => ConsoleColor.Green,
+            < 50 => ConsoleColor.DarkGreen,
+            < 100 => ConsoleColor.Yellow,
+            < 150 => ConsoleColor.DarkYellow,
+            < 200 => ConsoleColor.Magenta,
+            < 300 => ConsoleColor.DarkMagenta,
+            < 500 => ConsoleColor.Red,
+            _ => ConsoleColor.DarkRed
+        };
     }
 }

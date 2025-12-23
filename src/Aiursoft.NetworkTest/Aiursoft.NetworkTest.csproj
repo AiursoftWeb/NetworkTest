@@ -3,13 +3,13 @@
     <OutputType>Exe</OutputType>
     <Version>10.0.1</Version>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>networkTest</AssemblyName>
+    <AssemblyName>network-test</AssemblyName>
     <RootNamespace>Aiursoft.NetworkTest</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>networkTest</ToolCommandName>
+    <ToolCommandName>network-test</ToolCommandName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Company>Aiursoft</Company>

@@ -34,7 +34,7 @@ public class AllTestsHandler : ExecutableCommandHandlerBuilder
         // Run all available tests
         // Currently only domestic latency is implemented
         var domesticLatencyTest = host.Services.GetRequiredService<DomesticLatencyTestService>();
-        var domesticScore = await domesticLatencyTest.RunTestAsync();
+        var domesticScore = await domesticLatencyTest.RunTestAsync(verbose);
         testScores[domesticLatencyTest.TestName] = domesticScore;
 
         // TODO: Add more tests here as they are implemented

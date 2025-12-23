@@ -5,6 +5,5 @@ using Aiursoft.NetworkTest.Handlers;
 
 return await new NestedCommandApp()
     .WithGlobalOptions(CommonOptionsProvider.VerboseOption)
-    .WithFeature(new PingHandler())
     .WithFeature(new QualityHandler())
     .RunAsync(args);

@@ -8,9 +8,6 @@ public class Startup : IStartUp
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        // Existing ping service
-        services.AddScoped<PingWorker>();
-
         // Quality testing services
         services.AddSingleton<TableRenderer>();
         services.AddScoped<DomesticLatencyTestService>();
