@@ -1,6 +1,10 @@
 using Aiursoft.CommandFramework;
+using Aiursoft.CommandFramework.Models;
 using Aiursoft.NetworkTest;
+using Aiursoft.NetworkTest.Handlers;
 
-return await new SingleCommandApp<PingHandler>()
-    .WithDefaultOption(OptionsProvider.ServerOption)
+return await new NestedCommandApp()
+    .WithGlobalOptions(CommonOptionsProvider.VerboseOption)
+    .WithFeature(new PingHandler())
+    .WithFeature(new QualityHandler())
     .RunAsync(args);

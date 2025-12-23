@@ -8,6 +8,23 @@ public class Startup : IStartUp
 {
     public void ConfigureServices(IServiceCollection services)
     {
+        // Existing ping service
         services.AddScoped<PingWorker>();
+
+        // Quality testing services
+        services.AddSingleton<TableRenderer>();
+        services.AddScoped<DomesticLatencyTestService>();
+
+        // Configure HTTP client for quality tests
+        services.AddHttpClient("QualityTest")
+            .ConfigureHttpClient(client =>
+            {
+                client.Timeout = TimeSpan.FromMilliseconds(500);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = true,
+                MaxAutomaticRedirections = 5
+            });
     }
 }
