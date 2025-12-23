@@ -1,7 +1,6 @@
 using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.NetworkTest.Handlers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aiursoft.NetworkTest.Tests;
 
@@ -17,7 +16,7 @@ public class IntegrationTests
     {
         var result = await _program.TestRunAsync(["--help"]);
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.IsTrue(result.StdOut.Contains("quality"));
+        Assert.Contains("quality", result.StdOut);
     }
 
     [TestMethod]
@@ -39,9 +38,9 @@ public class IntegrationTests
     {
         var result = await _program.TestRunAsync(["quality", "--help"]);
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.IsTrue(result.StdOut.Contains("domestic-latency"));
-        Assert.IsTrue(result.StdOut.Contains("international-latency"));
-        Assert.IsTrue(result.StdOut.Contains("all"));
+        Assert.Contains("domestic-latency", result.StdOut);
+        Assert.Contains("international-latency", result.StdOut);
+        Assert.Contains("all", result.StdOut);
     }
 
     [TestMethod]
@@ -49,7 +48,7 @@ public class IntegrationTests
     {
         var result = await _program.TestRunAsync(["quality", "domestic-latency", "--help"]);
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.IsTrue(result.StdOut.Contains("Test domestic"));
+        Assert.Contains("Test domestic", result.StdOut);
     }
 
     [TestMethod]
@@ -57,6 +56,6 @@ public class IntegrationTests
     {
         var result = await _program.TestRunAsync(["quality", "international-latency", "--help"]);
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.IsTrue(result.StdOut.Contains("Test international"));
+        Assert.Contains("Test international", result.StdOut);
     }
 }

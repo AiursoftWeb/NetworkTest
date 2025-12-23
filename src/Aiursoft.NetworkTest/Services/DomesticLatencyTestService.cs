@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Aiursoft.NetworkTest.Models;
-using Microsoft.Extensions.Http;
 
 namespace Aiursoft.NetworkTest.Services;
 
@@ -139,7 +138,7 @@ public class DomesticLatencyTestService : ITestService
         var stopwatch = Stopwatch.StartNew();
 
         var request = new HttpRequestMessage(HttpMethod.Head, url);
-        var response = await client.SendAsync(request);
+        await client.SendAsync(request);
 
         stopwatch.Stop();
 

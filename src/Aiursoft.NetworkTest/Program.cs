@@ -1,6 +1,5 @@
 using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Models;
-using Aiursoft.NetworkTest;
 using Aiursoft.NetworkTest.Handlers;
 
 return await new NestedCommandApp()
