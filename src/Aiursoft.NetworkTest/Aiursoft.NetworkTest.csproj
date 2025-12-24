@@ -14,7 +14,7 @@
     <Nullable>enable</Nullable>
     <Company>Aiursoft</Company>
     <Product>NetworkTest</Product>
-    <Description>Nuget package of 'NetworkTest' provided by Aiursoft</Description>
+    <Description>NetworkTest is a tool testing current machine's network quality.</Description>
     <PackageId>Aiursoft.NetworkTest</PackageId>
     <PackageTags>nuget package dotnet csproj networkTest</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
