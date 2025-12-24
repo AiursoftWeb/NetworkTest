@@ -95,7 +95,7 @@ public abstract class LatencyTestServiceBase : ITestService
 
         Console.WriteLine();
         Console.WriteLine("Scoring Breakdown:");
-        Console.WriteLine($"  jun zhi- Min Latency Score (40% weight): {minLatencyScore:F2}");
+        Console.WriteLine($"  - Min Latency Score (40% weight): {minLatencyScore:F2}");
         Console.WriteLine($"  - Avg Latency Score (40% weight): {avgLatencyScore:F2}");
         Console.WriteLine($"  - Stability Score (20% weight): {stabilityScore:F2}");
         if (failurePenalty > 0)
