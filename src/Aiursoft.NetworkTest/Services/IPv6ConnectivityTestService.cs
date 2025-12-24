@@ -33,9 +33,23 @@ public class IPv6ConnectivityTestService : ITestService
         "https://v6.test-ipv6.com/ip/"
     };
 
-    // IP detection endpoints that return the client's IP
-    private readonly string _ipv4DetectionEndpoint = "https://api.ipify.org?format=json";
-    private readonly string _ipv6DetectionEndpoint = "https://api6.ipify.org?format=json";
+    // IP detection endpoints that return the client's IP (in order of preference, will try with fallback)
+    private readonly List<(string url, string format)> _ipv4DetectionEndpoints = new()
+    {
+        ("https://ipv4.icanhazip.com", "plain"),          // Usually works in China
+        ("https://v4.ident.me", "plain"),                 // Usually works in China
+        ("https://checkip.amazonaws.com", "plain"),       // AWS service, may work
+        ("https://api.ipify.org?format=json", "json"),    // May be blocked in China
+        ("https://ipv4.wtfismyip.com/text", "plain")      // Fallback
+    };
+    
+    private readonly List<(string url, string format)> _ipv6DetectionEndpoints = new()
+    {
+        ("https://ipv6.icanhazip.com", "plain"),          // Usually works in China
+        ("https://v6.ident.me", "plain"),                 // Usually works in China
+        ("https://api6.ipify.org?format=json", "json"),   // May be blocked in China
+        ("https://ipv6.wtfismyip.com/text", "plain")      // Fallback
+    };
 
     public IPv6ConnectivityTestService(
         IHttpClientFactory httpClientFactory,
@@ -229,57 +243,93 @@ public class IPv6ConnectivityTestService : ITestService
             Console.WriteLine("Testing IPv4 public IP (NAT check)...");
         }
 
-        try
+        string? serverSeenIP = null;
+        Exception? lastException = null;
+
+        // Try each endpoint until one succeeds
+        foreach (var (url, format) in _ipv4DetectionEndpoints)
         {
-            // Get the IP address seen by the server
-            var client = _httpClientFactory.CreateClient("IPv4ConnectivityTest");
-            var response = await client.GetStringAsync(_ipv4DetectionEndpoint);
-            var serverSeenIP = JsonDocument.Parse(response).RootElement.GetProperty("ip").GetString();
-
-            if (verbose)
+            try
             {
-                Console.WriteLine($"  Server sees IPv4: {serverSeenIP}");
-            }
-
-            // Get local network interface IPs
-            var localIPs = GetLocalIPv4Addresses();
-
-            if (verbose)
-            {
-                Console.WriteLine($"  Local IPv4 addresses: {string.Join(", ", localIPs)}");
-            }
-
-            // Check if server-seen IP matches any local IP
-            if (localIPs.Any(ip => ip == serverSeenIP))
-            {
-                if (verbose)
+                var client = _httpClientFactory.CreateClient("IPv4ConnectivityTest");
+                var response = await client.GetStringAsync(url);
+                
+                // Parse the response based on format
+                serverSeenIP = format switch
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"  ✓ Match found! Public IPv4 detected (no NAT)");
-                    Console.ResetColor();
+                    "json" => JsonDocument.Parse(response).RootElement.GetProperty("ip").GetString(),
+                    "plain" => response.Trim(),
+                    _ => throw new InvalidOperationException($"Unknown format: {format}")
+                };
+
+                // Success! Break out of the loop
+                if (!string.IsNullOrWhiteSpace(serverSeenIP))
+                {
+                    break;
                 }
-                return (25.0, serverSeenIP, true);
             }
-            else
+            catch (Exception ex)
             {
+                lastException = ex;
                 if (verbose)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"  ! No match - likely behind NAT");
+                    Console.WriteLine($"  ! Failed to query {url}: {ex.Message}");
                     Console.ResetColor();
                 }
-                return (0.0, serverSeenIP, false);
+                // Continue to next endpoint
             }
         }
-        catch (Exception ex)
+
+        // If all endpoints failed
+        if (string.IsNullOrWhiteSpace(serverSeenIP))
         {
             if (verbose)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"  ✗ IPv4 public IP test failed: {ex.Message}");
+                Console.WriteLine($"  ✗ IPv4 public IP test failed: All detection endpoints failed");
+                if (lastException != null)
+                {
+                    Console.WriteLine($"    Last error: {lastException.Message}");
+                }
                 Console.ResetColor();
             }
             return (0.0, null, false);
+        }
+
+        if (verbose)
+        {
+            Console.WriteLine($"  Server sees IPv4: {serverSeenIP}");
+        }
+
+        // Get local network interface IPs
+        var localIPs = GetLocalIPv4Addresses();
+
+        if (verbose)
+        {
+            Console.WriteLine($"  Local IPv4 addresses: {string.Join(", ", localIPs)}");
+        }
+
+        // Check if server-seen IP matches any local IP
+        if (localIPs.Any(ip => ip == serverSeenIP))
+        {
+            if (verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"  ✓ Match found! Public IPv4 detected (no NAT)");
+                Console.ResetColor();
+            }
+            return (25.0, serverSeenIP, true);
+        }
+        else
+        {
+            if (verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"  ! No match - likely behind NAT");
+                Console.ResetColor();
+            }
+            return (0.0, serverSeenIP, false);
         }
     }
 
@@ -290,57 +340,93 @@ public class IPv6ConnectivityTestService : ITestService
             Console.WriteLine("Testing IPv6 public IP (NAT check)...");
         }
 
-        try
+        string? serverSeenIP = null;
+        Exception? lastException = null;
+
+        // Try each endpoint until one succeeds
+        foreach (var (url, format) in _ipv6DetectionEndpoints)
         {
-            // Get the IP address seen by the server
-            var client = _httpClientFactory.CreateClient("IPv6ConnectivityTest");
-            var response = await client.GetStringAsync(_ipv6DetectionEndpoint);
-            var serverSeenIP = JsonDocument.Parse(response).RootElement.GetProperty("ip").GetString();
-
-            if (verbose)
+            try
             {
-                Console.WriteLine($"  Server sees IPv6: {serverSeenIP}");
-            }
-
-            // Get local network interface IPs
-            var localIPs = GetLocalIPv6Addresses();
-
-            if (verbose)
-            {
-                Console.WriteLine($"  Local IPv6 addresses: {string.Join(", ", localIPs)}");
-            }
-
-            // Check if server-seen IP matches any local IP
-            if (localIPs.Any(ip => ip == serverSeenIP))
-            {
-                if (verbose)
+                var client = _httpClientFactory.CreateClient("IPv6ConnectivityTest");
+                var response = await client.GetStringAsync(url);
+                
+                // Parse the response based on format
+                serverSeenIP = format switch
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"  ✓ Match found! Public IPv6 detected (no NAT)");
-                    Console.ResetColor();
+                    "json" => JsonDocument.Parse(response).RootElement.GetProperty("ip").GetString(),
+                    "plain" => response.Trim(),
+                    _ => throw new InvalidOperationException($"Unknown format: {format}")
+                };
+
+                // Success! Break out of the loop
+                if (!string.IsNullOrWhiteSpace(serverSeenIP))
+                {
+                    break;
                 }
-                return (25.0, serverSeenIP, true);
             }
-            else
+            catch (Exception ex)
             {
+                lastException = ex;
                 if (verbose)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"  ! No match - likely behind NAT or IPv6 translation");
+                    Console.WriteLine($"  ! Failed to query {url}: {ex.Message}");
                     Console.ResetColor();
                 }
-                return (0.0, serverSeenIP, false);
+                // Continue to next endpoint
             }
         }
-        catch (Exception ex)
+
+        // If all endpoints failed
+        if (string.IsNullOrWhiteSpace(serverSeenIP))
         {
             if (verbose)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"  ✗ IPv6 public IP test failed: {ex.Message}");
+                Console.WriteLine($"  ✗ IPv6 public IP test failed: All detection endpoints failed");
+                if (lastException != null)
+                {
+                    Console.WriteLine($"    Last error: {lastException.Message}");
+                }
                 Console.ResetColor();
             }
             return (0.0, null, false);
+        }
+
+        if (verbose)
+        {
+            Console.WriteLine($"  Server sees IPv6: {serverSeenIP}");
+        }
+
+        // Get local network interface IPs
+        var localIPs = GetLocalIPv6Addresses();
+
+        if (verbose)
+        {
+            Console.WriteLine($"  Local IPv6 addresses: {string.Join(", ", localIPs)}");
+        }
+
+        // Check if server-seen IP matches any local IP
+        if (localIPs.Any(ip => ip == serverSeenIP))
+        {
+            if (verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"  ✓ Match found! Public IPv6 detected (no NAT)");
+                Console.ResetColor();
+            }
+            return (25.0, serverSeenIP, true);
+        }
+        else
+        {
+            if (verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"  ! No match - likely behind NAT or IPv6 translation");
+                Console.ResetColor();
+            }
+            return (0.0, serverSeenIP, false);
         }
     }
 

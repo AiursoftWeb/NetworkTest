@@ -200,9 +200,12 @@ public class TableRenderer
     {
         Console.Write("| {0,-20} | ", TruncateString(result.TestName, 20));
 
-        // Status
+        // Status - green if all required endpoints succeeded, red otherwise
         var statusText = $"{result.SuccessfulEndpoints}/{result.TotalEndpoints}";
-        var statusColor = result.SuccessfulEndpoints >= 2 ? ConsoleColor.Green : ConsoleColor.Red;
+        // For tests with 1 endpoint (like Public IP tests), 1/1 should be green
+        // For tests with multiple endpoints, >= 2 should be green
+        var requiredSuccess = result.TotalEndpoints == 1 ? 1 : 2;
+        var statusColor = result.SuccessfulEndpoints >= requiredSuccess ? ConsoleColor.Green : ConsoleColor.Red;
         Console.ForegroundColor = statusColor;
         Console.Write(statusText.PadLeft(10));
         Console.ResetColor();
@@ -212,8 +215,8 @@ public class TableRenderer
         RenderColoredScore(result.Score, 10);
         Console.Write(" | ");
 
-        // Notes
-        var notesColor = result.HasPublicIP ? ConsoleColor.Green : ConsoleColor.Yellow;
+        // Notes - green if test succeeded (score > 0), yellow if failed but not critical
+        var notesColor = result.Score > 0 ? ConsoleColor.Green : ConsoleColor.Yellow;
         Console.ForegroundColor = notesColor;
         Console.Write(TruncateString(result.Notes, 50).PadRight(50));
         Console.ResetColor();

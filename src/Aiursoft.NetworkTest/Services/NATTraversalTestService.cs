@@ -241,15 +241,6 @@ public class NATTraversalTestService : ITestService
         return finalResult.Score;
     }
 
-    private async Task<(bool success, string? mappedIP, int? mappedPort)> TestSTUNConnectivity(
-        string stunServer, int stunPort, bool verbose)
-    {
-        using var client = new UdpClient();
-        client.Client.ReceiveTimeout = StunTimeoutMs;
-        client.Client.SendTimeout = StunTimeoutMs;
-        return await TestSTUNConnectivityWithClient(client, stunServer, stunPort, verbose);
-    }
-
     private async Task<(bool success, string? mappedIP, int? mappedPort)> TestSTUNConnectivityWithClient(
         UdpClient client, string stunServer, int stunPort, bool verbose)
     {
