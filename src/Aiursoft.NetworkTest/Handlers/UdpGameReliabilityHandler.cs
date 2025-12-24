@@ -47,25 +47,8 @@ public class UdpGameReliabilityHandler : ExecutableCommandHandlerBuilder
         // But for simplicity of this "fix step", I will skip the live progress bar or implement it later if user complains.
         // Alternatively, I can just print "Progress: [##############################] 100%" at the end.
         Console.WriteLine("Progress: [##############################] 100%");
-
-        var lossGrade = result.LostCount switch 
-        {
-            0 => "Perfect",
-            <= 1 => "Good",
-            <= 2 => "Bad",
-            _ => "Unplayable"
-        };
-
-        var jitterGrade = result.AvgJitter switch
-        {
-            < 5 => "Pro Level",
-            < 15 => "Excellent",
-            < 30 => "Average",
-            < 50 => "Laggy",
-            _ => "Terrible"
-        };
         
-        tableRenderer.RenderGameReliabilityResult(result, lossGrade, jitterGrade);
+        tableRenderer.RenderGameReliabilityResult(result, result.LossGrade, result.JitterGrade);
 
         if (result.FinalScore >= 90)
             Console.WriteLine("\nSummary: Your connection is perfect for competitive gaming.");

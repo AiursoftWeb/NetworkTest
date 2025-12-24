@@ -25,6 +25,8 @@ public class UdpGameTestResult
     public double AvgJitter { get; set; }
     public double FinalScore { get; set; }
     public string ScoreFormula { get; set; } = string.Empty;
+    public string LossGrade { get; set; } = string.Empty;
+    public string JitterGrade { get; set; } = string.Empty;
     
     public double AvgLatency => PacketResults.Any(p => !p.IsLost) 
         ? PacketResults.Where(p => !p.IsLost).Average(p => p.Rtt) 

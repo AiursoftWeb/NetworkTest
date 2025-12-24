@@ -7,7 +7,8 @@ using Microsoft.Extensions.Logging;
 namespace Aiursoft.NetworkTest.Services;
 
 public class UdpGameReliabilityTestService(
-    ILogger<UdpGameReliabilityTestService> logger) : ITestService
+    ILogger<UdpGameReliabilityTestService> logger,
+    TableRenderer tableRenderer) : ITestService
 {
     private static readonly string[] StunCandidates = 
     {
@@ -25,7 +26,17 @@ public class UdpGameReliabilityTestService(
 
     public async Task<double> RunTestAsync(bool verbose = false)
     {
+        Console.WriteLine();
+        Console.WriteLine("=== UDP Game Reliability Test ===");
+
         var result = await RunDetailedTestAsync();
+        
+        // Render results to console
+        tableRenderer.RenderGameReliabilityResult(result, result.LossGrade, result.JitterGrade);
+
+        // Render summary score (standard format for all tests)
+        tableRenderer.RenderScoreSummary(TestName, result.FinalScore);
+        
         return result.FinalScore;
     }
 
@@ -334,7 +345,22 @@ public class UdpGameReliabilityTestService(
         // 6. Generate Formula String
         result.ScoreFormula = $"Score = (LatencyScore[{latencyScore:F1}] * JitterMult[{jitterMultiplier:F2}]) - LossPenalty[{lossPenalty:F1}]";
         
-        // Debug
-        // logger.LogInformation($"Scoring: Latency={avgLatency:F1}ms->{latencyScore:F1}, Jitter={result.AvgJitter:F1}ms->x{jitterMultiplier:F2}, Loss={lossRatePercent:F1}%->-{lossPenalty:F1}");
+        // 7. Determine Grades
+        result.LossGrade = result.LostCount switch 
+        {
+            0 => "Perfect",
+            <= 1 => "Good",
+            <= 2 => "Fair",
+            _ => "Bad"
+        };
+        
+        result.JitterGrade = result.AvgJitter switch
+        {
+            < 5 => "Pro Level",
+            < 15 => "Excellent",
+            < 30 => "Good",
+            < 50 => "Acceptable",
+            _ => "Unstable"
+        };
     }
 }
