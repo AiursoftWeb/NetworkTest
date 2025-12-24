@@ -54,8 +54,8 @@ public class LatencyScoreCalculatorTests
         var score = LatencyScoreCalculator.CalculateMinLatencyScore(latency);
 
         // Assert
-        Assert.IsTrue(score <= 100.0, "Score should not exceed 100");
-        Assert.IsTrue(score >= 99.0, "Very low latency should yield near-maximum score");
+        Assert.IsLessThanOrEqualTo(100.0, score, "Score should not exceed 100");
+        Assert.IsGreaterThanOrEqualTo(99.0, score, "Very low latency should yield near-maximum score");
     }
 
     [TestMethod]
@@ -255,7 +255,7 @@ public class LatencyScoreCalculatorTests
             minLatency, avgLatency, stdDev, failures);
 
         // Assert
-        Assert.IsTrue(score >= 0.0, "Score should never be negative");
+        Assert.IsGreaterThanOrEqualTo(0.0, score, "Score should never be negative");
     }
 
     [TestMethod]
@@ -272,7 +272,7 @@ public class LatencyScoreCalculatorTests
             minLatency, avgLatency, stdDev, failures);
 
         // Assert
-        Assert.IsTrue(score <= 100.0, "Score should never exceed 100");
+        Assert.IsLessThanOrEqualTo(100.0, score, "Score should never exceed 100");
     }
 
     [TestMethod]

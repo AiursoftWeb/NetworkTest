@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -7,7 +6,6 @@ using Aiursoft.NetworkTest.Models;
 
 namespace Aiursoft.NetworkTest.Services;
 
-[ExcludeFromCodeCoverage]
 public class IPv6ConnectivityTestService : ITestService
 {
     private readonly IHttpClientFactory _httpClientFactory;

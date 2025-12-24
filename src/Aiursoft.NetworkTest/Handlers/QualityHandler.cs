@@ -1,9 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
 using Aiursoft.CommandFramework.Framework;
 
 namespace Aiursoft.NetworkTest.Handlers;
 
-[ExcludeFromCodeCoverage]
 public class QualityHandler : NavigationCommandHandlerBuilder
 {
     protected override string Name => "quality";

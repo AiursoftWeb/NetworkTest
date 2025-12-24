@@ -327,7 +327,7 @@ public class NATTestResultTests
         Assert.AreEqual(90.0, result.BaseScore);
         Assert.AreEqual(10.0, result.UPnPBonus);
         Assert.AreEqual(100.0, result.Score);
-        Assert.AreEqual(2, result.TestDetails.Count);
+        Assert.HasCount(2, result.TestDetails);
     }
 
     [TestMethod]
@@ -342,7 +342,7 @@ public class NATTestResultTests
 
         // Assert
         Assert.IsNotNull(result.TestDetails);
-        Assert.AreEqual(0, result.TestDetails.Count);
+        Assert.IsEmpty(result.TestDetails);
     }
 
     [TestMethod]

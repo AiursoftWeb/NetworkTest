@@ -364,7 +364,7 @@ public class EndpointTestResultTests
         // Assert
         Assert.AreEqual("Google DNS", result.EndpointName);
         Assert.AreEqual("https://dns.google", result.Url);
-        Assert.AreEqual(3, result.Latencies.Count);
+        Assert.HasCount(3, result.Latencies);
         Assert.AreEqual(2, result.FailedCount);
     }
 }

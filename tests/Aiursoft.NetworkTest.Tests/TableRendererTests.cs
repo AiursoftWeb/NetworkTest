@@ -39,7 +39,7 @@ public class TableRendererTests
         // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(20, result.Length, "Result should be exactly maxLength");
-        Assert.IsTrue(result.EndsWith(".."), "Truncated string should end with ..");
+        StringAssert.EndsWith(result, "..", "Truncated string should end with ..");
     }
 
     [TestMethod]
@@ -271,7 +271,7 @@ public class TableRendererTests
         var output = writer.ToString();
 
         // Assert
-        Assert.IsTrue(output.Contains("No test results available"), "Should show no results message");
+        StringAssert.Contains(output, "No test results available", "Should show no results message");
     }
 
     [TestMethod]
@@ -302,9 +302,9 @@ public class TableRendererTests
         var output = writer.ToString();
 
         // Assert
-        Assert.IsTrue(output.Contains("Service"), "Should contain header");
-        Assert.IsTrue(output.Contains("Min (ms)"), "Should contain column header");
-        Assert.IsTrue(output.Contains("Test Service"), "Should contain service name");
+        StringAssert.Contains(output, "Service", "Should contain header");
+        StringAssert.Contains(output, "Min (ms)", "Should contain column header");
+        StringAssert.Contains(output, "Test Service", "Should contain service name");
     }
 
     [TestMethod]
@@ -327,7 +327,7 @@ public class TableRendererTests
         var output = writer.ToString();
 
         // Assert
-        Assert.IsTrue(output.Contains("No connectivity test results available"), "Should show no results message");
+        StringAssert.Contains(output, "No connectivity test results available", "Should show no results message");
     }
 
     [TestMethod]
@@ -360,8 +360,8 @@ public class TableRendererTests
         var output = writer.ToString();
 
         // Assert
-        Assert.IsTrue(output.Contains("IPv4 Test"), "Should contain test name");
-        Assert.IsTrue(output.Contains("3/4"), "Should contain status");
+        StringAssert.Contains(output, "IPv4 Test", "Should contain test name");
+        StringAssert.Contains(output, "3/4", "Should contain status");
     }
 
     [TestMethod]
@@ -383,9 +383,9 @@ public class TableRendererTests
         var output = writer.ToString();
 
         // Assert
-        Assert.IsTrue(output.Contains("Test Name Score"), "Should contain test name");
-        Assert.IsTrue(output.Contains("85.50"), "Should contain formatted score");
-        Assert.IsTrue(output.Contains("100"), "Should contain max score");
+        StringAssert.Contains(output, "Test Name Score", "Should contain test name");
+        StringAssert.Contains(output, "85.50", "Should contain formatted score");
+        StringAssert.Contains(output, "100", "Should contain max score");
     }
 
     [TestMethod]
@@ -412,9 +412,9 @@ public class TableRendererTests
         var output = writer.ToString();
 
         // Assert
-        Assert.IsTrue(output.Contains("Network Quality Test Summary"), "Should contain summary header");
-        Assert.IsTrue(output.Contains("China Products"), "Should contain test name");
-        Assert.IsTrue(output.Contains("Overall Score"), "Should contain overall score row");
+        StringAssert.Contains(output, "Network Quality Test Summary", "Should contain summary header");
+        StringAssert.Contains(output, "China Products", "Should contain test name");
+        StringAssert.Contains(output, "Overall Score", "Should contain overall score row");
     }
 
     [TestMethod]
@@ -448,13 +448,13 @@ public class TableRendererTests
         var output = writer.ToString();
 
         // Assert
-        Assert.IsTrue(output.Contains("NAT Type"), "Should contain NAT Type row");
-        Assert.IsTrue(output.Contains("Full Cone NAT"), "Should contain NAT description");
-        Assert.IsTrue(output.Contains("192.168.1.100"), "Should contain local IP");
-        Assert.IsTrue(output.Contains("203.0.113.5"), "Should contain public IP");
-        Assert.IsTrue(output.Contains("UPnP Port Mapping"), "Should contain UPnP row");
-        Assert.IsTrue(output.Contains("P2P Connectivity"), "Should contain P2P row");
-        Assert.IsTrue(output.Contains("Final Score"), "Should contain final score");
+        StringAssert.Contains(output, "NAT Type", "Should contain NAT Type row");
+        StringAssert.Contains(output, "Full Cone NAT", "Should contain NAT description");
+        StringAssert.Contains(output, "192.168.1.100", "Should contain local IP");
+        StringAssert.Contains(output, "203.0.113.5", "Should contain public IP");
+        StringAssert.Contains(output, "UPnP Port Mapping", "Should contain UPnP row");
+        StringAssert.Contains(output, "P2P Connectivity", "Should contain P2P row");
+        StringAssert.Contains(output, "Final Score", "Should contain final score");
     }
 
     [TestMethod]
@@ -483,6 +483,6 @@ public class TableRendererTests
         var output = writer.ToString();
 
         // Assert
-        Assert.IsTrue(output.Contains("Not available"), "Should show UPnP not available");
+        StringAssert.Contains(output, "Not available", "Should show UPnP not available");
     }
 }

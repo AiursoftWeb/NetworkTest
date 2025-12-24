@@ -3,6 +3,8 @@ using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.NetworkTest.Handlers;
 
+namespace Aiursoft.NetworkTest;
+
 [ExcludeFromCodeCoverage]
 internal class Program
 {

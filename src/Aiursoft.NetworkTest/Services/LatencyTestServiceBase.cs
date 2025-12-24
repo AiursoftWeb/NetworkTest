@@ -1,10 +1,8 @@
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Aiursoft.NetworkTest.Models;
 
 namespace Aiursoft.NetworkTest.Services;
 
-[ExcludeFromCodeCoverage]
 public abstract class LatencyTestServiceBase : ITestService
 {
     private readonly IHttpClientFactory _httpClientFactory;
