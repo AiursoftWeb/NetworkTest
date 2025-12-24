@@ -21,7 +21,7 @@ public class InternationalLatencyTestService : ITestService
         ("Gstatic Gen204", "http://connectivitycheck.gstatic.com/generate_204"),
         ("Firefox Detect", "http://detectportal.firefox.com/success.txt"),
         ("GitHub Zen", "https://api.github.com/zen"),
-        ("Cloudflare DNS", "https://1.0.0.1/")
+        ("Cloudflare DNS", "https://1.1.1.1/")
     };
 
     public InternationalLatencyTestService(
