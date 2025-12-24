@@ -87,7 +87,7 @@ public class IPv6ConnectivityTestService : ITestService
         totalScore += ipv6Score;
         results.Add(new ConnectivityTestResult
         {
-            TestName = "IPv6 Connectivity",
+            TestName = "IP Connectivity",
             SuccessfulEndpoints = ipv6Success,
             TotalEndpoints = ipv6Total,
             Score = ipv6Score,
@@ -191,7 +191,7 @@ public class IPv6ConnectivityTestService : ITestService
     {
         if (verbose)
         {
-            Console.WriteLine("Testing IPv6 connectivity...");
+            Console.WriteLine("Testing IP connectivity...");
         }
 
         var successCount = 0;

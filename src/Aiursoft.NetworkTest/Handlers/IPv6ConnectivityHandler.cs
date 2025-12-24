@@ -9,9 +9,9 @@ namespace Aiursoft.NetworkTest.Handlers;
 
 public class IPv6ConnectivityHandler : ExecutableCommandHandlerBuilder
 {
-    protected override string Name => "ipv6-connectivity";
+    protected override string Name => "ip-connectivity";
 
-    protected override string Description => "Test IPv6 connectivity and public IP availability.";
+    protected override string Description => "Test IP connectivity quality and public IP availability.";
 
     protected override Option[] GetCommandOptions() =>
     [
