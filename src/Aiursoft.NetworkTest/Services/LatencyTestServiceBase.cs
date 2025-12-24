@@ -25,6 +25,11 @@ public abstract class LatencyTestServiceBase : ITestService
     {
         Console.WriteLine();
         Console.WriteLine($"=== {TestName} Test ===");
+        Console.WriteLine($"Warming up {Endpoints.Count} endpoints...");
+        
+        // Warmup all endpoints in parallel
+        await WarmupEndpointsAsync();
+        
         Console.WriteLine($"Testing {Endpoints.Count} endpoints with 6 requests each...");
         Console.WriteLine();
 
@@ -40,8 +45,14 @@ public abstract class LatencyTestServiceBase : ITestService
 
         // Calculate comprehensive metrics
         var overallAverageLatency = results.Average(r => r.AverageLatency);
-        var overallMinLatency = results.Min(r => r.MinLatency > 0 ? r.MinLatency : double.MaxValue);
-        if (overallMinLatency >= double.MaxValue - 1) overallMinLatency = 0;
+        
+        // Calculate average of minimum latencies across all endpoints
+        // This prevents a single localhost/intranet server from skewing the score
+        var overallMinLatency = results
+            .Where(r => r.MinLatency > 0)
+            .Select(r => r.MinLatency)
+            .DefaultIfEmpty(0)
+            .Average();
         
         // Calculate average of per-endpoint standard deviations
         // This reflects network jitter, not server-to-server differences
@@ -84,7 +95,7 @@ public abstract class LatencyTestServiceBase : ITestService
 
         Console.WriteLine();
         Console.WriteLine("Scoring Breakdown:");
-        Console.WriteLine($"  - Min Latency Score (40% weight): {minLatencyScore:F2}");
+        Console.WriteLine($"  jun zhi- Min Latency Score (40% weight): {minLatencyScore:F2}");
         Console.WriteLine($"  - Avg Latency Score (40% weight): {avgLatencyScore:F2}");
         Console.WriteLine($"  - Stability Score (20% weight): {stabilityScore:F2}");
         if (failurePenalty > 0)
@@ -95,6 +106,29 @@ public abstract class LatencyTestServiceBase : ITestService
         _tableRenderer.RenderScoreSummary(TestName, score);
 
         return score;
+    }
+
+    private async Task WarmupEndpointsAsync()
+    {
+        var warmupTasks = Endpoints.Select(endpoint => WarmupSingleEndpointAsync(endpoint.Url));
+        await Task.WhenAll(warmupTasks);
+        Console.WriteLine("Warmup completed.");
+        Console.WriteLine();
+    }
+
+    private async Task WarmupSingleEndpointAsync(string url)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient(HttpClientName);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            var request = new HttpRequestMessage(HttpMethod.Head, url);
+            await client.SendAsync(request, cts.Token);
+        }
+        catch
+        {
+            // Ignore all warmup failures - we just want to establish connections if possible
+        }
     }
 
     private async Task<EndpointTestResult> TestEndpointAsync(string name, string url, bool verbose)
