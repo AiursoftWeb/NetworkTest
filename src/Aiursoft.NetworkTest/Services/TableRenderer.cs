@@ -325,4 +325,146 @@ public class TableRenderer
         Console.WriteLine();
     }
 
+
+    public void RenderTable(string[] headers, List<string[]> rows)
+    {
+        if (headers.Length == 0 || rows.Count == 0) return;
+
+        // Calculate column widths
+        var columnWidths = new int[headers.Length];
+        for (int i = 0; i < headers.Length; i++)
+        {
+            columnWidths[i] = headers[i].Length;
+        }
+
+        foreach (var row in rows)
+        {
+            for (int i = 0; i < Math.Min(row.Length, headers.Length); i++)
+            {
+                if (row[i].Length > columnWidths[i])
+                {
+                    columnWidths[i] = row[i].Length;
+                }
+            }
+        }
+        
+        // Add padding
+        for (int i = 0; i < columnWidths.Length; i++)
+        {
+            columnWidths[i] += 2; // +2 for spacing
+        }
+
+        // Build format string
+        var formatBuilder = new System.Text.StringBuilder("|");
+        for (int i = 0; i < headers.Length; i++)
+        {
+            formatBuilder.Append(" {" + i + ",-" + columnWidths[i] + "} |");
+        }
+        var formatString = formatBuilder.ToString();
+
+        // Print Header
+        Console.WriteLine(formatString, headers);
+        
+        // Print Separator
+        Console.Write("|");
+        for(int i=0; i<headers.Length; i++)
+        {
+           Console.Write(new string('-', columnWidths[i] + 2));
+           Console.Write("|"); 
+        }
+        Console.WriteLine();
+
+        // Print Rows
+        foreach (var row in rows)
+        {
+        }
+        Console.WriteLine();
+    }
+        
+    public void RenderGameReliabilityResult(UdpGameTestResult result, string lossGrade, string jitterGrade)
+    {
+        // Custom rendering for Game Reliability Test to support colors
+        var headers = new[] { "Metric", "Measured Value", "Grade", "Score" };
+        var columnWidths = new[] { 15, 15, 15, 10 }; // Fixed widths for better alignment or calc dynamic
+        
+        // Print Header
+        Console.WriteLine();
+        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", headers[0], headers[1], headers[2], headers[3]);
+        Console.WriteLine("|{0}|{1}|{2}|{3}|", new string('-', 17), new string('-', 17), new string('-', 17), new string('-', 12));
+
+        // Packet Sent
+        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Packet Sent", result.SentCount, "-", "-");
+
+        // Packet Lost
+        Console.Write("| {0,-15} | ", "Packet Lost");
+        Console.Write($"{result.LostCount,-15}");
+        Console.Write(" | ");
+        
+        // Grade Color
+        var lossColor = result.LostCount switch 
+        {
+            0 => ConsoleColor.Green,
+            <= 1 => ConsoleColor.Cyan,
+            <= 2 => ConsoleColor.Yellow,
+            _ => ConsoleColor.Red
+        };
+        Console.ForegroundColor = lossColor;
+        Console.Write($"{lossGrade,-15}");
+        Console.ResetColor();
+        Console.Write(" | ");
+
+        // Score
+        RenderColoredScore(result.LostCount == 0 ? 100 : (result.LostCount <= 1 ? 80 : (result.LostCount <= 2 ? 50 : 0)), 10);
+        Console.WriteLine(" |");
+
+        // Loss Rate
+        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Loss Rate", $"{result.LossRate:F2}%", "-", "-");
+
+        // Latencies
+        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Avg Latency", $"{result.AvgLatency:F2} ms", "-", "-");
+        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Max Latency", $"{result.MaxLatency:F2} ms", "-", "-");
+        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Min Latency", $"{result.MinLatency:F2} ms", "-", "-");
+
+        // Jitter
+        Console.Write("| {0,-15} | ", "Jitter (Avg)");
+        Console.Write($"{$"{result.AvgJitter:F2} ms",-15}");
+        Console.Write(" | ");
+        
+        var jitterColor = result.AvgJitter switch
+        {
+            < 5 => ConsoleColor.Green,
+            < 15 => ConsoleColor.Cyan,
+            < 30 => ConsoleColor.Yellow,
+            < 50 => ConsoleColor.DarkYellow,
+            _ => ConsoleColor.Red
+        };
+        Console.ForegroundColor = jitterColor;
+        Console.Write($"{jitterGrade,-15}");
+        Console.ResetColor();
+        Console.Write(" | ");
+        
+        RenderColoredScore(result.AvgJitter < 5 ? 100 : (result.AvgJitter < 15 ? 90 : (result.AvgJitter < 30 ? 70 : (result.AvgJitter < 50 ? 40 : 0))), 10);
+        Console.WriteLine(" |");
+
+        // Separator
+        Console.WriteLine("|{0}|{1}|{2}|{3}|", new string('-', 17), new string('-', 17), new string('-', 17), new string('-', 12));
+
+        // Final Score
+        Console.Write("| {0,-15} | {1,-15} | {2,-15} | ", "Final Score", "", "");
+        RenderColoredScore(result.FinalScore, 10);
+        Console.WriteLine(" |");
+        Console.WriteLine();
+        
+        Console.WriteLine($"Formula: {result.ScoreFormula}");
+        // Determine summary text based on score
+        string GetSummary(double score) => score switch
+        {
+            >= 90 => "Your connection is perfect for competitive gaming.",
+            >= 80 => "Your connection is excellent.",
+            >= 70 => "Your connection is good for casual gaming.",
+            >= 60 => "Your connection is acceptable but may experience lag.",
+            _ => "Your connection is not suitable for realtime gaming."
+        };
+        Console.WriteLine($"Summary: {GetSummary(result.FinalScore)}");
+    }
 }

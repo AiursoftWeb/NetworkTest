@@ -14,6 +14,7 @@ public class QualityHandler : NavigationCommandHandlerBuilder
         new InternationalLatencyHandler(),
         new IPv6ConnectivityHandler(),
         new NATTraversalHandler(),
+        new UdpGameReliabilityHandler(),
         new AllTestsHandler()
         // Future tests will be added here:
         // new DomesticSpeedHandler(),
