@@ -2,6 +2,8 @@ using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.NetworkTest.Handlers;
 
+[assembly:DoNotParallelize]
+
 namespace Aiursoft.NetworkTest.Tests;
 
 [TestClass]
