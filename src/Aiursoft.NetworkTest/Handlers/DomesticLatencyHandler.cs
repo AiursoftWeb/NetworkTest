@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.CommandLine;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Models;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NetworkTest.Handlers;
 
+[ExcludeFromCodeCoverage]
 public class DomesticLatencyHandler : ExecutableCommandHandlerBuilder
 {
     protected override string Name => "china-products";

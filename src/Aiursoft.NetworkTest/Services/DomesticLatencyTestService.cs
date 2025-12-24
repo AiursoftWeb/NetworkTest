@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Aiursoft.NetworkTest.Services;
 
+[ExcludeFromCodeCoverage]
 public class DomesticLatencyTestService : LatencyTestServiceBase
 {
     public override string TestName => "China Products Latency";

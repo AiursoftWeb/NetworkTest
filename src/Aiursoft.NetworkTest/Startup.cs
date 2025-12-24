@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using Aiursoft.CommandFramework.Abstracts;
 using Aiursoft.NetworkTest.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NetworkTest;
 
+[ExcludeFromCodeCoverage]
 public class Startup : IStartUp
 {
     public void ConfigureServices(IServiceCollection services)

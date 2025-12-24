@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -7,6 +8,7 @@ using Open.Nat;
 
 namespace Aiursoft.NetworkTest.Services;
 
+[ExcludeFromCodeCoverage]
 public class NATTraversalTestService : ITestService
 {
     private readonly TableRenderer _tableRenderer;

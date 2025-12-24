@@ -1,7 +1,9 @@
 using System.CommandLine;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Aiursoft.NetworkTest;
 
+[ExcludeFromCodeCoverage]
 public static class OptionsProvider
 {
     public static readonly Option<string> ServerOption = new(

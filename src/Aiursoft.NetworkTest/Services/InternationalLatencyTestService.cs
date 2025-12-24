@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Aiursoft.NetworkTest.Services;
 
+[ExcludeFromCodeCoverage]
 public class InternationalLatencyTestService : LatencyTestServiceBase
 {
     public override string TestName => "Global Products Latency";
