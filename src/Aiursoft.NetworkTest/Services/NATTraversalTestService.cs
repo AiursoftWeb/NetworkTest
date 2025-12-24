@@ -66,7 +66,13 @@ public class NATTraversalTestService : ITestService
         }
 
         // Step 2: Test basic UDP connectivity with STUN
-        var (stunSuccess, mappedAddress, mappedPort) = await TestSTUNConnectivity(PrimaryStunServer, PrimaryStunPort, verbose);
+        // Create a UDP client that we'll reuse for both tests to ensure same local port
+        using var udpClient = new UdpClient();
+        udpClient.Client.ReceiveTimeout = StunTimeoutMs;
+        udpClient.Client.SendTimeout = StunTimeoutMs;
+
+        var (stunSuccess, mappedAddress, mappedPort) = await TestSTUNConnectivityWithClient(
+            udpClient, PrimaryStunServer, PrimaryStunPort, verbose);
         
         if (!stunSuccess)
         {
@@ -143,7 +149,9 @@ public class NATTraversalTestService : ITestService
         testDetails.Add("Behind NAT - classifying NAT type");
 
         // Step 4: Test for Symmetric NAT by checking port consistency across different destinations
-        var (stunSuccess2, _, mappedPort2) = await TestSTUNConnectivity(SecondaryStunServer, SecondaryStunPort, verbose);
+        // CRITICAL: Reuse the SAME UDP client to ensure we're testing from the same local port
+        var (stunSuccess2, _, mappedPort2) = await TestSTUNConnectivityWithClient(
+            udpClient, SecondaryStunServer, SecondaryStunPort, verbose);
         
         if (stunSuccess2 && mappedPort2 != mappedPort)
         {
@@ -236,6 +244,15 @@ public class NATTraversalTestService : ITestService
     private async Task<(bool success, string? mappedIP, int? mappedPort)> TestSTUNConnectivity(
         string stunServer, int stunPort, bool verbose)
     {
+        using var client = new UdpClient();
+        client.Client.ReceiveTimeout = StunTimeoutMs;
+        client.Client.SendTimeout = StunTimeoutMs;
+        return await TestSTUNConnectivityWithClient(client, stunServer, stunPort, verbose);
+    }
+
+    private async Task<(bool success, string? mappedIP, int? mappedPort)> TestSTUNConnectivityWithClient(
+        UdpClient client, string stunServer, int stunPort, bool verbose)
+    {
         try
         {
             // Resolve STUN server
@@ -252,10 +269,6 @@ public class NATTraversalTestService : ITestService
                 }
                 return (false, null, null);
             }
-
-            using var client = new UdpClient();
-            client.Client.ReceiveTimeout = StunTimeoutMs;
-            client.Client.SendTimeout = StunTimeoutMs;
 
             var serverEndpoint = new IPEndPoint(serverAddress, stunPort);
 
