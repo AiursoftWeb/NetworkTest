@@ -13,6 +13,7 @@ public class QualityHandler : NavigationCommandHandlerBuilder
         new DomesticLatencyHandler(),
         new InternationalLatencyHandler(),
         new IPv6ConnectivityHandler(),
+        new NATTraversalHandler(),
         new AllTestsHandler()
         // Future tests will be added here:
         // new DomesticSpeedHandler(),

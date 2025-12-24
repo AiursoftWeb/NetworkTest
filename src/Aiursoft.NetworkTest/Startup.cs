@@ -14,6 +14,7 @@ public class Startup : IStartUp
         services.AddScoped<DomesticLatencyTestService>();
         services.AddScoped<InternationalLatencyTestService>();
         services.AddScoped<IPv6ConnectivityTestService>();
+        services.AddScoped<NATTraversalTestService>();
 
         // Configure HTTP client for domestic quality tests (800ms timeout)
         services.AddHttpClient("DomesticQualityTest")

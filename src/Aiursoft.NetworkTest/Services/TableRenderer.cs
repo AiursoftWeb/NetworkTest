@@ -222,4 +222,102 @@ public class TableRenderer
         Console.WriteLine();
     }
 
+    public void RenderNATTestResults(NATTestResult result)
+    {
+        Console.WriteLine();
+        Console.WriteLine("| {0,-25} | {1,-50} | {2,-10} |", "Test Item", "Result", "Score");
+        Console.WriteLine("|{0}|{1}|{2}|",
+            new string('-', 27), new string('-', 52), new string('-', 12));
+
+        // NAT Type
+        Console.Write("| {0,-25} | ", "NAT Type");
+        var natColor = result.NATType switch
+        {
+            NATType.OpenInternet => ConsoleColor.Green,
+            NATType.FullCone => ConsoleColor.Green,
+            NATType.RestrictedCone => ConsoleColor.Yellow,
+            NATType.PortRestrictedCone => ConsoleColor.DarkYellow,
+            NATType.Symmetric => ConsoleColor.Red,
+            NATType.UDPBlocked => ConsoleColor.Red,
+            _ => ConsoleColor.Gray
+        };
+        Console.ForegroundColor = natColor;
+        Console.Write(TruncateString(result.NATTypeDescription, 50).PadRight(50));
+        Console.ResetColor();
+        Console.Write(" | ");
+        RenderColoredScore(result.BaseScore, 10);
+        Console.WriteLine(" |");
+
+        // Local IP
+        Console.WriteLine("| {0,-25} | {1,-50} | {2,10} |",
+            "Local IP",
+            TruncateString(result.LocalIP ?? "N/A", 50),
+            "");
+
+        // Public IP
+        var publicIPDisplay = result.MappedPublicIP != null
+            ? $"{result.MappedPublicIP}:{result.MappedPublicPort}"
+            : "N/A";
+        Console.WriteLine("| {0,-25} | {1,-50} | {2,10} |",
+            "Public IP (via STUN)",
+            TruncateString(publicIPDisplay, 50),
+            "");
+
+        // Behind NAT
+        Console.Write("| {0,-25} | ", "Behind NAT");
+        var natStatusColor = result.BehindNAT ? ConsoleColor.Yellow : ConsoleColor.Green;
+        Console.ForegroundColor = natStatusColor;
+        Console.Write((result.BehindNAT ? "Yes" : "No").PadRight(50));
+        Console.ResetColor();
+        Console.WriteLine(" | {0,10} |", "");
+
+        // UPnP
+        Console.Write("| {0,-25} | ", "UPnP Port Mapping");
+        var upnpColor = result.UPnPAvailable ? ConsoleColor.Green : ConsoleColor.DarkGray;
+        var upnpText = result.UPnPAvailable
+            ? $"Available (tested port {result.UPnPTestedPort})"
+            : "Not available";
+        Console.ForegroundColor = upnpColor;
+        Console.Write(TruncateString(upnpText, 50).PadRight(50));
+        Console.ResetColor();
+        Console.Write(" | ");
+        if (result.UPnPBonus > 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"+{result.UPnPBonus:F0}".PadLeft(10));
+            Console.ResetColor();
+        }
+        else
+        {
+            Console.Write("".PadLeft(10));
+        }
+        Console.WriteLine(" |");
+
+        // P2P Capability
+        Console.Write("| {0,-25} | ", "P2P Connectivity");
+        var p2pColor = result.NATType switch
+        {
+            NATType.OpenInternet or NATType.FullCone => ConsoleColor.Green,
+            NATType.RestrictedCone => ConsoleColor.DarkGreen,
+            NATType.PortRestrictedCone when result.UPnPAvailable => ConsoleColor.Yellow,
+            NATType.PortRestrictedCone => ConsoleColor.DarkYellow,
+            _ => ConsoleColor.Red
+        };
+        Console.ForegroundColor = p2pColor;
+        Console.Write(TruncateString(result.P2PCapability, 50).PadRight(50));
+        Console.ResetColor();
+        Console.WriteLine(" | {0,10} |", "");
+
+        // Separator
+        Console.WriteLine("|{0}|{1}|{2}|",
+            new string('-', 27), new string('-', 52), new string('-', 12));
+
+        // Final Score
+        Console.Write("| {0,-25} | {1,-50} | ", "Final Score", "");
+        RenderColoredScore(result.Score, 10);
+        Console.WriteLine(" |");
+
+        Console.WriteLine();
+    }
+
 }

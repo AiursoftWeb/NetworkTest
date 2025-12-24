@@ -58,4 +58,13 @@ public class IntegrationTests
         Assert.AreEqual(0, result.ProgramReturn);
         Assert.Contains("Test international", result.StdOut);
     }
+
+    [TestMethod]
+    public async Task InvokeNATTraversalHelp()
+    {
+        var result = await _program.TestRunAsync(["quality", "nat-traversal", "--help"]);
+        Assert.AreEqual(0, result.ProgramReturn);
+        Assert.Contains("NAT type", result.StdOut);
+        Assert.Contains("P2P", result.StdOut);
+    }
 }

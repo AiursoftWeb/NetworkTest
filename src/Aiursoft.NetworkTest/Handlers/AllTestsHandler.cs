@@ -43,6 +43,10 @@ public class AllTestsHandler : ExecutableCommandHandlerBuilder
         var ipv6ConnectivityScore = await ipv6ConnectivityTest.RunTestAsync(verbose);
         testScores[ipv6ConnectivityTest.TestName] = ipv6ConnectivityScore;
 
+        var natTraversalTest = host.Services.GetRequiredService<NATTraversalTestService>();
+        var natTraversalScore = await natTraversalTest.RunTestAsync(verbose);
+        testScores[natTraversalTest.TestName] = natTraversalScore;
+
         // TODO: Add more tests here as they are implemented
         // var domesticSpeedTest = host.Services.GetRequiredService<DomesticSpeedTestService>();
         // var domesticSpeedScore = await domesticSpeedTest.RunTestAsync(verbose);

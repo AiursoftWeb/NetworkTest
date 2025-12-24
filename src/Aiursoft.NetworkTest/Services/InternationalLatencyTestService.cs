@@ -13,6 +13,9 @@ public class InternationalLatencyTestService : ITestService
 
     private readonly List<(string Name, string Url)> _endpoints = new()
     {
+        // 纯文本/极简返回，适合做 HTTP 连通性测试
+        ("Android (Gstatic)", "http://connectivitycheck.gstatic.com/generate_204"), // 安卓原生检测，不同于 google.com，走的是 gstatic CDN
+        ("Cloudflare CP", "http://cp.cloudflare.com/"), // 也是 204，很多旁路检测工具喜欢用这个
         ("Cloudflare Trace", "https://www.cloudflare.com/cdn-cgi/trace"),
         ("Google Gen204", "https://www.google.com/generate_204"),
         ("MS Connect Test", "http://www.msftconnecttest.com/connecttest.txt"),
