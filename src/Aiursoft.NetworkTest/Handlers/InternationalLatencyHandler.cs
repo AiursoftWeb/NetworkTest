@@ -9,9 +9,9 @@ namespace Aiursoft.NetworkTest.Handlers;
 
 public class InternationalLatencyHandler : ExecutableCommandHandlerBuilder
 {
-    protected override string Name => "international-latency";
+    protected override string Name => "global-products";
 
-    protected override string Description => "Test international web service latency and speed.";
+    protected override string Description => "Test global internet products latency.";
 
     protected override Option[] GetCommandOptions() =>
     [

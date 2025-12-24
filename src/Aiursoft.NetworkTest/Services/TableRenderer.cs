@@ -15,7 +15,7 @@ public class TableRenderer
         // Print table header
         Console.WriteLine();
         Console.WriteLine("| {0,-15} | {1,-10} | {2,-10} | {3,-10} | {4,-10} | {5,-10} | {6,-10} | {7,-10} |",
-            "Service", "Min (ms)", "Avg (ms)", "Med (ms)", "Max (ms)", ">100ms %", ">200ms %", ">300ms %");
+            "Service", "Min (ms)", "Avg (ms)", "StdDev", "Max (ms)", ">100ms %", ">200ms %", ">300ms %");
         Console.WriteLine("|{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|",
             new string('-', 17), new string('-', 12), new string('-', 12), new string('-', 12),
             new string('-', 12), new string('-', 12), new string('-', 12), new string('-', 12));
@@ -41,8 +41,8 @@ public class TableRenderer
         RenderColoredLatency(result.AverageLatency, 10);
         Console.Write(" | ");
 
-        // Median latency
-        RenderColoredLatency(result.MedianLatency, 10);
+        // Standard deviation
+        RenderColoredLatency(result.StandardDeviation, 10);
         Console.Write(" | ");
 
         // Max latency

@@ -9,9 +9,9 @@ namespace Aiursoft.NetworkTest.Handlers;
 
 public class DomesticLatencyHandler : ExecutableCommandHandlerBuilder
 {
-    protected override string Name => "domestic-latency";
+    protected override string Name => "china-products";
 
-    protected override string Description => "Test domestic (China) web service latency and speed.";
+    protected override string Description => "Test China-based internet products latency.";
 
     protected override Option[] GetCommandOptions() =>
     [
