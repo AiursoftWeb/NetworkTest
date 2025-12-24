@@ -22,4 +22,15 @@ public class EndpointTestResult
     public double PercentageOver100Ms => Latencies.Count > 0 ? (double)Latencies.Count(x => x > 100) / Latencies.Count * 100 : 0;
     public double PercentageOver200Ms => Latencies.Count > 0 ? (double)Latencies.Count(x => x > 200) / Latencies.Count * 100 : 0;
     public double PercentageOver300Ms => Latencies.Count > 0 ? (double)Latencies.Count(x => x > 300) / Latencies.Count * 100 : 0;
+    
+    public double StandardDeviation
+    {
+        get
+        {
+            if (Latencies.Count == 0) return 0;
+            var avg = Latencies.Average();
+            var sumOfSquares = Latencies.Sum(x => Math.Pow(x - avg, 2));
+            return Math.Sqrt(sumOfSquares / Latencies.Count);
+        }
+    }
 }

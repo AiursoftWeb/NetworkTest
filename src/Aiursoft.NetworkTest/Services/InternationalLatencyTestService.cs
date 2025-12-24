@@ -49,24 +49,63 @@ public class InternationalLatencyTestService : ITestService
         // Render final table
         _tableRenderer.RenderTestResultsTable(results);
 
-        // Calculate score: 170 - average latency, then deduct 5 points per failure
+        // Calculate comprehensive metrics
         var overallAverageLatency = results.Average(r => r.AverageLatency);
-        var totalFailures = results.Sum(r => r.FailedCount);
-        var totalRequests = _endpoints.Count * 6;  // Total number of requests attempted
+        var overallMinLatency = results.Min(r => r.MinLatency > 0 ? r.MinLatency : double.MaxValue);
+        if (overallMinLatency == double.MaxValue) overallMinLatency = 0;
+        
+        // Calculate overall standard deviation (weighted by number of samples)
+        var allLatencies = results.SelectMany(r => r.Latencies).ToList();
+        var overallStandardDeviation = allLatencies.Count > 0 
+            ? Math.Sqrt(allLatencies.Sum(x => Math.Pow(x - overallAverageLatency, 2)) / allLatencies.Count)
+            : 0;
+
+        // Collect failures per endpoint for smart penalty calculation
+        var failuresByEndpoint = results.Select(r => r.FailedCount).ToList();
+        var totalFailures = failuresByEndpoint.Sum();
+        var totalRequests = _endpoints.Count * 6;
         var successfulRequests = totalRequests - totalFailures;
-        var baseScore = Math.Max(0, Math.Min(100, 170 - overallAverageLatency));
-        var score = Math.Max(0, baseScore - (totalFailures * 5));
+
+        // Use new comprehensive scoring algorithm
+        const double internationalAvgBaselineLatency = 70.0; // 70ms baseline for average latency
+        const double internationalMinBaselineLatency = 50.0; // 50ms baseline for minimum latency (stricter)
+        
+        var score = LatencyScoreCalculator.CalculateComprehensiveScore(
+            overallMinLatency, 
+            overallAverageLatency, 
+            overallStandardDeviation,
+            internationalMinBaselineLatency,
+            internationalAvgBaselineLatency,
+            failuresByEndpoint);
+
+        // Calculate individual component scores for display
+        var minLatencyScore = LatencyScoreCalculator.CalculateLatencyScore(overallMinLatency, internationalMinBaselineLatency);
+        var avgLatencyScore = LatencyScoreCalculator.CalculateLatencyScore(overallAverageLatency, internationalAvgBaselineLatency);
+        var stabilityScore = LatencyScoreCalculator.CalculateStabilityScore(overallStandardDeviation);
+        var failurePenalty = LatencyScoreCalculator.CalculateSmartFailurePenalty(failuresByEndpoint);
 
         // Display scoring breakdown
         Console.WriteLine();
-        Console.WriteLine("Scoring Breakdown:");
-        Console.WriteLine($"  - Average Latency: {overallAverageLatency:F2} ms");
+        Console.WriteLine("Network Metrics:");
+        Console.WriteLine($"  - Minimum Latency: {overallMinLatency:F2} ms (Best link quality)");
+        Console.WriteLine($"  - Average Latency: {overallAverageLatency:F2} ms (Overall performance)");
+        Console.WriteLine($"  - Standard Deviation: {overallStandardDeviation:F2} ms (Stability)");
         Console.WriteLine($"  - Successful Requests: {successfulRequests}/{totalRequests}");
-        Console.WriteLine($"  - Failed Requests: {totalFailures}");
-        Console.WriteLine($"  - Base Score (170 - avg latency): {baseScore:F2}");
         if (totalFailures > 0)
         {
-            Console.WriteLine($"  - Failure Penalty: -{totalFailures * 5} ({totalFailures} × 5)");
+            var maxFailuresInSingleEndpoint = failuresByEndpoint.Max();
+            var effectiveFailures = totalFailures - maxFailuresInSingleEndpoint;
+            Console.WriteLine($"  - Failed Requests: {totalFailures} (worst endpoint: {maxFailuresInSingleEndpoint}, counted: {effectiveFailures})");
+        }
+        
+        Console.WriteLine();
+        Console.WriteLine("Scoring Breakdown:");
+        Console.WriteLine($"  - Min Latency Score (40% weight): {minLatencyScore:F2}");
+        Console.WriteLine($"  - Avg Latency Score (40% weight): {avgLatencyScore:F2}");
+        Console.WriteLine($"  - Stability Score (20% weight): {stabilityScore:F2}");
+        if (failurePenalty > 0)
+        {
+            Console.WriteLine($"  - Smart Failure Penalty: -{failurePenalty:F2} (with 10pt hidden tolerance)");
         }
 
         _tableRenderer.RenderScoreSummary(TestName, score);
