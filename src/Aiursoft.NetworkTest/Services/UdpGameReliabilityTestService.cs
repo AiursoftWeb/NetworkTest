@@ -138,7 +138,7 @@ public class UdpGameReliabilityTestService(
         foreach (var group in resolvedGroups)
         {
             // Limit to 4 IPs per hostname to avoid flooding the table
-            foreach (var (ep, host, original) in group.Take(4))
+            foreach (var (ep, _, original) in group.Take(4))
             {
                 candidates.Add((ep, original));
             }
@@ -162,18 +162,44 @@ public class UdpGameReliabilityTestService(
         
         // 3. Output Table
         Console.WriteLine("\n=== STUN Server Benchmark Results ===");
-        Console.WriteLine(string.Format("{0,-35} | {1,-15} | {2,-10} | {3,-10}", "Server", "IP Endpoint", "Avg RTT", "Loss"));
+        Console.WriteLine("{0,-35} | {1,-15} | {2,-10} | {3,-10}", "Server", "IP Endpoint", "Avg RTT", "Loss");
         Console.WriteLine(new string('-', 80));
 
         foreach (var item in benchmarkResults.OrderBy(x => x.Result.LossRate).ThenBy(x => x.Result.AvgRtt))
         {
              var rttDisplay = item.Result.AvgRtt < 9999 ? $"{item.Result.AvgRtt:F1} ms" : "Timeout";
              var lossDisplay = $"{item.Result.LossRate * 100:F0}%";
-             Console.WriteLine(string.Format("{0,-35} | {1,-15} | {2,-10} | {3,-10}", 
-                item.Candidate.Hostname, 
-                item.Candidate.EndPoint, 
-                rttDisplay, 
-                lossDisplay));
+             
+             // Hostname Color logic: Green if 0% loss, Yellow if < 100% loss, Red if 100% loss
+             var hostColor = item.Result.LossRate == 0 ? ConsoleColor.Green : (item.Result.LossRate < 1 ? ConsoleColor.Yellow : ConsoleColor.Red);
+             Console.ForegroundColor = hostColor;
+             Console.Write("{0,-35}", TruncateString(item.Candidate.Hostname, 35));
+             Console.ResetColor();
+             Console.Write(" | ");
+
+             Console.Write("{0,-20}", item.Candidate.EndPoint);
+             Console.Write(" | ");
+
+             // RTT Color logic
+             var rttColor = item.Result.AvgRtt switch
+             {
+                 < 50 => ConsoleColor.Green,
+                 < 100 => ConsoleColor.DarkGreen,
+                 < 150 => ConsoleColor.Yellow,
+                 < 200 => ConsoleColor.DarkYellow,
+                 < 9999 => ConsoleColor.Red,
+                 _ => ConsoleColor.DarkRed
+             };
+             Console.ForegroundColor = rttColor;
+             Console.Write("{0,-10}", rttDisplay);
+             Console.ResetColor();
+             Console.Write(" | ");
+
+             // Loss Color logic
+             var lossColor = item.Result.LossRate == 0 ? ConsoleColor.Green : ConsoleColor.Red;
+             Console.ForegroundColor = lossColor;
+             Console.WriteLine("{0,-10}", lossDisplay);
+             Console.ResetColor();
         }
         Console.WriteLine();
 
@@ -223,7 +249,10 @@ public class UdpGameReliabilityTestService(
                      received++;
                 }
             }
-            catch {}
+            catch (Exception)
+            {
+                // Ignore
+            }
             // Small delay between pings
             await Task.Delay(5);
         }
@@ -231,6 +260,11 @@ public class UdpGameReliabilityTestService(
         double loss = 1.0 - ((double)received / packetsCount);
         double avg = received > 0 ? (double)totalRtt / received : 99999;
         return (avg, loss);
+    }
+
+    private string TruncateString(string value, int maxLength)
+    {
+        return value.Length <= maxLength ? value : value.Substring(0, maxLength - 2) + "..";
     }
 
     private async Task<List<IPEndPoint>> ResolveAllIPv4(string host, int port)

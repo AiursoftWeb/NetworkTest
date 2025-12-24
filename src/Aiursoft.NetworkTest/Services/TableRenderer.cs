@@ -375,9 +375,7 @@ public class TableRenderer
         Console.WriteLine();
 
         // Print Rows
-        foreach (var row in rows)
-        {
-        }
+
         Console.WriteLine();
     }
         
@@ -385,7 +383,6 @@ public class TableRenderer
     {
         // Custom rendering for Game Reliability Test to support colors
         var headers = new[] { "Metric", "Measured Value", "Grade", "Score" };
-        var columnWidths = new[] { 15, 15, 15, 10 }; // Fixed widths for better alignment or calc dynamic
         
         // Print Header
         Console.WriteLine();
@@ -397,7 +394,9 @@ public class TableRenderer
 
         // Packet Lost
         Console.Write("| {0,-15} | ", "Packet Lost");
+        Console.ForegroundColor = result.LostCount == 0 ? ConsoleColor.Green : (result.LostCount <= 2 ? ConsoleColor.Yellow : ConsoleColor.Red);
         Console.Write($"{result.LostCount,-15}");
+        Console.ResetColor();
         Console.Write(" | ");
         
         // Grade Color
@@ -418,16 +417,36 @@ public class TableRenderer
         Console.WriteLine(" |");
 
         // Loss Rate
-        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Loss Rate", $"{result.LossRate:F2}%", "-", "-");
+        Console.Write("| {0,-15} | ", "Loss Rate");
+        Console.ForegroundColor = result.LossRate == 0 ? ConsoleColor.Green : (result.LossRate < 0.01 ? ConsoleColor.Yellow : ConsoleColor.Red);
+        Console.Write($"{result.LossRate,-14:F2}%");
+        Console.ResetColor();
+        Console.WriteLine(" | {0,-15} | {1,-10} |", "-", "-");
 
         // Latencies
-        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Avg Latency", $"{result.AvgLatency:F2} ms", "-", "-");
-        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Max Latency", $"{result.MaxLatency:F2} ms", "-", "-");
-        Console.WriteLine("| {0,-15} | {1,-15} | {2,-15} | {3,-10} |", "Min Latency", $"{result.MinLatency:F2} ms", "-", "-");
+        void RenderLatencyRow(string label, double value)
+        {
+            Console.Write("| {0,-15} | ", label);
+            RenderColoredLatency(value, 12);
+            Console.Write(" ms | {0,-15} | {1,-10} |", "-", "-");
+            Console.WriteLine();
+        }
+
+        RenderLatencyRow("Avg Latency", result.AvgLatency);
+        RenderLatencyRow("Max Latency", result.MaxLatency);
+        RenderLatencyRow("Min Latency", result.MinLatency);
 
         // Jitter
         Console.Write("| {0,-15} | ", "Jitter (Avg)");
-        Console.Write($"{$"{result.AvgJitter:F2} ms",-15}");
+        var jitterValColor = result.AvgJitter switch
+        {
+            < 5 => ConsoleColor.Green,
+            < 30 => ConsoleColor.Yellow,
+            _ => ConsoleColor.Red
+        };
+        Console.ForegroundColor = jitterValColor;
+        Console.Write($"{result.AvgJitter,-12:F2} ms");
+        Console.ResetColor();
         Console.Write(" | ");
         
         var jitterColor = result.AvgJitter switch
