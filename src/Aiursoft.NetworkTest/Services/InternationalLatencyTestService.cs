@@ -18,10 +18,7 @@ public class InternationalLatencyTestService : ITestService
         ("MS Connect Test", "http://www.msftconnecttest.com/connecttest.txt"),
         ("Apple Captive", "http://captive.apple.com/hotspot-detect.html"),
         ("AWS CheckIP", "https://checkip.amazonaws.com"),
-        ("Gstatic Gen204", "http://connectivitycheck.gstatic.com/generate_204"),
         ("Firefox Detect", "http://detectportal.firefox.com/success.txt"),
-        ("GitHub Zen", "https://api.github.com/zen"),
-        ("Cloudflare DNS", "https://1.1.1.1/")
     };
 
     public InternationalLatencyTestService(

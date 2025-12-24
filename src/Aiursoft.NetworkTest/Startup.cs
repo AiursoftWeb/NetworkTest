@@ -13,6 +13,7 @@ public class Startup : IStartUp
         services.AddSingleton<TableRenderer>();
         services.AddScoped<DomesticLatencyTestService>();
         services.AddScoped<InternationalLatencyTestService>();
+        services.AddScoped<IPv6ConnectivityTestService>();
 
         // Configure HTTP client for domestic quality tests (800ms timeout)
         services.AddHttpClient("DomesticQualityTest")
@@ -36,6 +37,52 @@ public class Startup : IStartUp
             {
                 AllowAutoRedirect = true,
                 MaxAutomaticRedirections = 5
+            });
+
+        // Configure HTTP client for IPv4-only connectivity tests
+        services.AddHttpClient("IPv4ConnectivityTest")
+            .ConfigureHttpClient(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(5);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                AllowAutoRedirect = true,
+                MaxAutomaticRedirections = 5,
+                ConnectCallback = async (context, cancellationToken) =>
+                {
+                    // Force IPv4 connection
+                    var socket = new System.Net.Sockets.Socket(
+                        System.Net.Sockets.AddressFamily.InterNetwork,
+                        System.Net.Sockets.SocketType.Stream,
+                        System.Net.Sockets.ProtocolType.Tcp);
+                    
+                    await socket.ConnectAsync(context.DnsEndPoint, cancellationToken);
+                    return new System.Net.Sockets.NetworkStream(socket, ownsSocket: true);
+                }
+            });
+
+        // Configure HTTP client for IPv6-only connectivity tests
+        services.AddHttpClient("IPv6ConnectivityTest")
+            .ConfigureHttpClient(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(5);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                AllowAutoRedirect = true,
+                MaxAutomaticRedirections = 5,
+                ConnectCallback = async (context, cancellationToken) =>
+                {
+                    // Force IPv6 connection
+                    var socket = new System.Net.Sockets.Socket(
+                        System.Net.Sockets.AddressFamily.InterNetworkV6,
+                        System.Net.Sockets.SocketType.Stream,
+                        System.Net.Sockets.ProtocolType.Tcp);
+                    
+                    await socket.ConnectAsync(context.DnsEndPoint, cancellationToken);
+                    return new System.Net.Sockets.NetworkStream(socket, ownsSocket: true);
+                }
             });
     }
 }

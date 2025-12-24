@@ -21,7 +21,6 @@ public class DomesticLatencyTestService : ITestService
         ("360 DNS", "https://doh.360.cn/resolve?name=www.360.cn"),
         ("Baidu CDN", "https://www.baidu.com/favicon.ico"),
         ("Bilibili CDN", "https://i0.hdslb.com/bfs/face/member/noface.jpg"),
-        ("V2EX 204", "https://www.v2ex.com/generate_204"),
     };
 
     public DomesticLatencyTestService(

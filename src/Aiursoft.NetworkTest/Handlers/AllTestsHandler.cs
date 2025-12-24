@@ -39,6 +39,10 @@ public class AllTestsHandler : ExecutableCommandHandlerBuilder
         var internationalScore = await internationalLatencyTest.RunTestAsync(verbose);
         testScores[internationalLatencyTest.TestName] = internationalScore;
 
+        var ipv6ConnectivityTest = host.Services.GetRequiredService<IPv6ConnectivityTestService>();
+        var ipv6ConnectivityScore = await ipv6ConnectivityTest.RunTestAsync(verbose);
+        testScores[ipv6ConnectivityTest.TestName] = ipv6ConnectivityScore;
+
         // TODO: Add more tests here as they are implemented
         // var domesticSpeedTest = host.Services.GetRequiredService<DomesticSpeedTestService>();
         // var domesticSpeedScore = await domesticSpeedTest.RunTestAsync(verbose);

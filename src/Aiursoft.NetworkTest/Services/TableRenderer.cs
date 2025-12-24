@@ -171,4 +171,55 @@ public class TableRenderer
     {
         return value.Length <= maxLength ? value : value.Substring(0, maxLength - 2) + "..";
     }
+
+    public void RenderConnectivityTestsTable(List<ConnectivityTestResult> results)
+    {
+        if (results.Count == 0)
+        {
+            Console.WriteLine("No connectivity test results available.");
+            return;
+        }
+
+        // Print table header
+        Console.WriteLine();
+        Console.WriteLine("| {0,-20} | {1,-10} | {2,-10} | {3,-50} |",
+            "Test", "Status", "Score", "Notes");
+        Console.WriteLine("|{0}|{1}|{2}|{3}|",
+            new string('-', 22), new string('-', 12), new string('-', 12), new string('-', 52));
+
+        // Print each result
+        foreach (var result in results)
+        {
+            RenderConnectivityResultRow(result);
+        }
+
+        Console.WriteLine();
+    }
+
+    private void RenderConnectivityResultRow(ConnectivityTestResult result)
+    {
+        Console.Write("| {0,-20} | ", TruncateString(result.TestName, 20));
+
+        // Status
+        var statusText = $"{result.SuccessfulEndpoints}/{result.TotalEndpoints}";
+        var statusColor = result.SuccessfulEndpoints >= 2 ? ConsoleColor.Green : ConsoleColor.Red;
+        Console.ForegroundColor = statusColor;
+        Console.Write(statusText.PadLeft(10));
+        Console.ResetColor();
+        Console.Write(" | ");
+
+        // Score
+        RenderColoredScore(result.Score, 10);
+        Console.Write(" | ");
+
+        // Notes
+        var notesColor = result.HasPublicIP ? ConsoleColor.Green : ConsoleColor.Yellow;
+        Console.ForegroundColor = notesColor;
+        Console.Write(TruncateString(result.Notes, 50).PadRight(50));
+        Console.ResetColor();
+        Console.Write(" |");
+
+        Console.WriteLine();
+    }
+
 }
