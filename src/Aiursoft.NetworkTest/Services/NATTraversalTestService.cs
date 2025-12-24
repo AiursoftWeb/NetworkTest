@@ -143,7 +143,7 @@ public class NATTraversalTestService : ITestService
         testDetails.Add("Behind NAT - classifying NAT type");
 
         // Step 4: Test for Symmetric NAT by checking port consistency across different destinations
-        var (stunSuccess2, mappedAddress2, mappedPort2) = await TestSTUNConnectivity(SecondaryStunServer, SecondaryStunPort, verbose);
+        var (stunSuccess2, _, mappedPort2) = await TestSTUNConnectivity(SecondaryStunServer, SecondaryStunPort, verbose);
         
         if (stunSuccess2 && mappedPort2 != mappedPort)
         {

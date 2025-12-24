@@ -41,7 +41,7 @@ public abstract class LatencyTestServiceBase : ITestService
         // Calculate comprehensive metrics
         var overallAverageLatency = results.Average(r => r.AverageLatency);
         var overallMinLatency = results.Min(r => r.MinLatency > 0 ? r.MinLatency : double.MaxValue);
-        if (overallMinLatency == double.MaxValue) overallMinLatency = 0;
+        if (overallMinLatency >= double.MaxValue - 1) overallMinLatency = 0;
         
         // Calculate average of per-endpoint standard deviations
         // This reflects network jitter, not server-to-server differences

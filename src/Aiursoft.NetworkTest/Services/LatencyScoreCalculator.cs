@@ -92,7 +92,7 @@ public static class LatencyScoreCalculator
     /// <returns>Penalty points to deduct from score</returns>
     public static double CalculateSmartFailurePenalty(List<int> failuresByEndpoint)
     {
-        if (failuresByEndpoint == null || failuresByEndpoint.Count == 0) return 0;
+        if (failuresByEndpoint.Count == 0) return 0;
         
         // Find and exclude the endpoint with most failures (likely server issue, not network quality)
         var maxFailures = failuresByEndpoint.Max();
