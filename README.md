@@ -6,7 +6,7 @@
 [![NuGet version (Aiursoft.NetworkTest)](https://img.shields.io/nuget/v/Aiursoft.NetworkTest.svg)](https://www.nuget.org/packages/Aiursoft.NetworkTest/)
 [![Man hours](https://manhours.aiursoft.com/r/gitlab.aiursoft.com/aiursoft/networkTest.svg)](https://manhours.aiursoft.com/r/gitlab.aiursoft.com/aiursoft/networkTest.html)
 
-NetworkTest is a simple network test tool.
+NetworkTest is a tool testing current machine's network quality.
 
 ## Installation
 
