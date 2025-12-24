@@ -212,7 +212,9 @@ public class TableRenderer
         Console.Write(" | ");
 
         // Score
-        RenderColoredScore(result.Score, 10);
+        Console.ForegroundColor = statusColor;
+        Console.Write(result.Score.ToString("F2").PadLeft(10));
+        Console.ResetColor();
         Console.Write(" | ");
 
         // Notes - green if test succeeded (score > 0), yellow if failed but not critical
