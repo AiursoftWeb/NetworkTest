@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Aiursoft.NetworkTest.Services;
 
 public class UdpGameReliabilityTestService(
-    ILogger<UdpGameReliabilityTestService> logger)
+    ILogger<UdpGameReliabilityTestService> logger) : ITestService
 {
     private static readonly string[] StunCandidates = 
     {
@@ -21,7 +21,15 @@ public class UdpGameReliabilityTestService(
     "global.stun.twilio.com:3478"
     };
 
-    public async Task<UdpGameTestResult> RunTestAsync()
+    public string TestName => "UDP Game Reliability";
+
+    public async Task<double> RunTestAsync(bool verbose = false)
+    {
+        var result = await RunDetailedTestAsync();
+        return result.FinalScore;
+    }
+
+    public async Task<UdpGameTestResult> RunDetailedTestAsync()
     {
         var target = await IdentifyBestStunServer();
         var result = new UdpGameTestResult
@@ -86,8 +94,8 @@ public class UdpGameReliabilityTestService(
 
             result.PacketResults.Add(packet);
             
-            // Sleep 50ms (Simulate 20Hz tick rate)
-            await Task.Delay(50);
+            // Sleep 50ms (Simulate 100Hz tick rate)
+            await Task.Delay(10);
         }
 
         CalculateMetrics(result);
@@ -98,20 +106,31 @@ public class UdpGameReliabilityTestService(
     {
         var candidates = new List<(IPEndPoint EndPoint, string Hostname)>();
 
-        // 1. Resolve all candidates in parallel
+        // 1. Resolve all candidates in parallel (Resolve ALL IPs)
         var resolveTasks = StunCandidates.Select(async candidate => 
         {
-            var parts = candidate.Split(':');
-            var host = parts[0];
-            var port = int.Parse(parts[1]);
-            var ep = await ResolveToIPv4(host, port);
-            return (ep, host, candidate);
+            try 
+            {
+                var parts = candidate.Split(':');
+                var host = parts[0];
+                var port = int.Parse(parts[1]);
+                var eps = await ResolveAllIPv4(host, port);
+                return eps.Select(ep => (ep, host, candidate));
+            }
+            catch
+            {
+                return Enumerable.Empty<(IPEndPoint, string, string)>();
+            }
         });
 
-        var resolved = await Task.WhenAll(resolveTasks);
-        foreach (var (ep, host, original) in resolved)
+        var resolvedGroups = await Task.WhenAll(resolveTasks);
+        foreach (var group in resolvedGroups)
         {
-            if (ep != null) candidates.Add((ep, original));
+            // Limit to 4 IPs per hostname to avoid flooding the table
+            foreach (var (ep, host, original) in group.Take(4))
+            {
+                candidates.Add((ep, original));
+            }
         }
 
         if (candidates.Count == 0)
@@ -119,7 +138,7 @@ public class UdpGameReliabilityTestService(
             throw new Exception("Could not resolve any STUN servers.");
         }
         
-        logger.LogInformation($"Resolved {candidates.Count} STUN servers. Benchmarking (10 packets each)...");
+        logger.LogInformation($"Resolved {candidates.Count} STUN endpoints. Benchmarking (10 packets each)...");
 
         // 2. Measure latency for all candidates in parallel
         var benchmarkTasks = candidates.Select(async candidate => 
@@ -195,7 +214,7 @@ public class UdpGameReliabilityTestService(
             }
             catch {}
             // Small delay between pings
-            await Task.Delay(20);
+            await Task.Delay(5);
         }
 
         double loss = 1.0 - ((double)received / packetsCount);
@@ -203,19 +222,21 @@ public class UdpGameReliabilityTestService(
         return (avg, loss);
     }
 
-    private async Task<IPEndPoint?> ResolveToIPv4(string host, int port)
+    private async Task<List<IPEndPoint>> ResolveAllIPv4(string host, int port)
     {
         try 
         {
             var addresses = await Dns.GetHostAddressesAsync(host);
-            var ipv4 = addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
-            if (ipv4 != null) return new IPEndPoint(ipv4, port);
+            return addresses
+                .Where(a => a.AddressFamily == AddressFamily.InterNetwork)
+                .Select(a => new IPEndPoint(a, port))
+                .ToList();
         }
         catch
         {
             // Logging would be good practice but we might not want to spam logs here
+            return new List<IPEndPoint>();
         }
-        return null;
     }
 
     private async Task<byte[]?> ReceiveWithTimeout(UdpClient client, int expectedId)
@@ -223,37 +244,23 @@ public class UdpGameReliabilityTestService(
         try 
         {
              // In a real STUN client we would parse the headers.
-             // Here we just read. If we wanted to go extra mile we'd parse Transaction ID.
-             // Given the complexity of STUN parsing and the "synchronous" nature of the test (one by one),
-             // and the short timeout, it's safer to just assume the first reply is ours or specific errors.
-             // But let's try to match ID if possible?
-             // STUN Transaction ID starts at byte 8 (12 bytes long currently generated as first byte only differing).
-             
-             // Actually, `ReceiveAsync` doesn't support timeout on the socket well in all platforms, 
-             // but we wrapped it in Task.WhenAny above.
+             // We wrapped ReceiveAsync in Task.WhenAny in the caller, but here we just await it.
              
              var result = await client.ReceiveAsync();
              
-             // Basic STUN validation: First byte should be 0 or 1 roughly (Binding Response is 0x0101)
-             // Transaction ID check:
-             // Request we sent: 0x00, 0x01 (Binding Request), 0x00, 0x00 (Length), Magic Cookie, Transaction ID
-             // Transaction ID in our helper is 12 bytes.
-             // We put `expectedId` into the first byte of transaction ID for simplicity.
-             // The response should reflect that.
-             
-             if (result.Buffer.Length > 20)
+             // Basic STUN validation: Length >= 20
+             if (result.Buffer.Length >= 20)
              {
-                 // Transaction ID starts at offset 8
-                 if (result.Buffer[8] == (byte)expectedId)
+                 // Transaction ID starts at offset 8 (12 bytes).
+                 // We stored sequence ID in the first 4 bytes (8,9,10,11).
+                 // Check if it matches expectedId
+                 var receivedId = BitConverter.ToInt32(result.Buffer, 8);
+                 if (receivedId == expectedId)
                  {
                      return result.Buffer;
                  }
-                 // If ID doesn't match, it might be an old packet or delayed packet. 
-                 // In a simple loop, we might just discard it and try receiving again?
-                 // For now, let's just return it - if it's wildly wrong, it just counts as collected.
-                 // Realistically with 50ms spacing and 1000ms timeout, overlap is possible if latency > 50ms.
              }
-             return result.Buffer;
+             return null;
 
         } 
         catch 
@@ -273,9 +280,17 @@ public class UdpGameReliabilityTestService(
         packet[2] = 0x00; packet[3] = 0x00; // Length
         packet[4] = 0x21; packet[5] = 0x12; packet[6] = 0xA4; packet[7] = 0x42; // Magic Cookie
         
-        // Transaction ID (random usually, but we embed ID)
-        packet[8] = (byte)transId; 
-        // Rest can be 0 or random
+        // Transaction ID (12 bytes)
+        // Generate random bytes for the whole ID first to avoid "all-zero" patterns that firewalls drop
+        Random.Shared.NextBytes(packet.AsSpan(8, 12));
+
+        // Embed sequence ID in the first 4 bytes for tracking
+        var seqBytes = BitConverter.GetBytes(transId);
+        packet[8] = seqBytes[0];
+        packet[9] = seqBytes[1];
+        packet[10] = seqBytes[2];
+        packet[11] = seqBytes[3];
+        
         return packet;
     }
 
@@ -292,13 +307,13 @@ public class UdpGameReliabilityTestService(
         result.AvgJitter = (validPackets.Count > 1) ? (totalJitter / (validPackets.Count - 1)) : 0;
 
         // 2. Latency Score (Base Score)
-        // Logarithmic decay: 15ms -> 100, 50ms -> 80, 100ms -> 68, 200ms -> 57
-        // Formula: 100 - 16.6 * ln(Latency / 15)
+        // Logarithmic decay: 10ms -> 100, 50ms -> 70, 90ms -> 50, 130ms -> 40, 170ms -> 35
+        // Formula: 100 - 22 * ln(Latency / 10)
         double avgLatency = result.AvgLatency;
         double latencyScore = 100;
-        if (avgLatency > 15)
+        if (avgLatency > 10)
         {
-            latencyScore = 100 - 16.6 * Math.Log(avgLatency / 15.0);
+            latencyScore = 100 - 22.0 * Math.Log(avgLatency / 10.0);
         }
         latencyScore = Math.Clamp(latencyScore, 0, 100);
 

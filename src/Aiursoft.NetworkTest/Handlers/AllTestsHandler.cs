@@ -47,6 +47,10 @@ public class AllTestsHandler : ExecutableCommandHandlerBuilder
         var natTraversalScore = await natTraversalTest.RunTestAsync(verbose);
         testScores[natTraversalTest.TestName] = natTraversalScore;
 
+        var udpTest = host.Services.GetRequiredService<UdpGameReliabilityTestService>();
+        var udpScore = await udpTest.RunTestAsync(verbose);
+        testScores[udpTest.TestName] = udpScore;
+
         // TODO: Add more tests here as they are implemented
         // var domesticSpeedTest = host.Services.GetRequiredService<DomesticSpeedTestService>();
         // var domesticSpeedScore = await domesticSpeedTest.RunTestAsync(verbose);

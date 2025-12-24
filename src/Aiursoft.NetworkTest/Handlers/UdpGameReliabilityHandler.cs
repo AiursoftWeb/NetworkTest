@@ -34,7 +34,7 @@ public class UdpGameReliabilityHandler : ExecutableCommandHandlerBuilder
         
         Console.WriteLine("=== UDP Game Reliability Test ===");
 
-        var result = await testService.RunTestAsync();
+        var result = await testService.RunDetailedTestAsync();
 
         Console.WriteLine($"Target: {result.TargetHost}:{result.TargetPort}");
         Console.WriteLine("Sending 30 packets (Interval: 50ms)...\n");
