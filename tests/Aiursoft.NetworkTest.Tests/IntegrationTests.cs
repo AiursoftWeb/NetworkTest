@@ -38,25 +38,25 @@ public class IntegrationTests
     {
         var result = await _program.TestRunAsync(["quality", "--help"]);
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.Contains("domestic-latency", result.StdOut);
-        Assert.Contains("international-latency", result.StdOut);
+        Assert.Contains("china-products", result.StdOut);
+        Assert.Contains("global-products", result.StdOut);
         Assert.Contains("all", result.StdOut);
     }
 
     [TestMethod]
-    public async Task InvokeDomesticLatencyHelp()
+    public async Task InvokeChinaProductsHelp()
     {
-        var result = await _program.TestRunAsync(["quality", "domestic-latency", "--help"]);
+        var result = await _program.TestRunAsync(["quality", "china-products", "--help"]);
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.Contains("Test domestic", result.StdOut);
+        Assert.Contains("China-based", result.StdOut);
     }
 
     [TestMethod]
-    public async Task InvokeInternationalLatencyHelp()
+    public async Task InvokeGlobalProductsHelp()
     {
-        var result = await _program.TestRunAsync(["quality", "international-latency", "--help"]);
+        var result = await _program.TestRunAsync(["quality", "global-products", "--help"]);
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.Contains("Test international", result.StdOut);
+        Assert.Contains("global internet", result.StdOut);
     }
 
     [TestMethod]
