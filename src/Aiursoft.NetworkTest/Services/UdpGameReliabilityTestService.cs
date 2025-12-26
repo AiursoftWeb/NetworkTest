@@ -54,6 +54,9 @@ public class UdpGameReliabilityTestService(
         
         logger.LogInformation($"Starting UDP Game Reliability Test to {target.Hostname} ({target.EndPoint})...");
 
+        var consecutiveLossCount = 0;
+        var receivedCount = 0;
+
         for (int i = 0; i < 300; i++)
         {
             var packet = new PacketResult { SequenceId = i, SendTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() };
@@ -105,6 +108,22 @@ public class UdpGameReliabilityTestService(
 
             result.PacketResults.Add(packet);
             
+            if (packet.IsLost)
+            {
+                consecutiveLossCount++;
+            }
+            else
+            {
+                consecutiveLossCount = 0;
+                receivedCount++;
+            }
+
+            if (receivedCount == 0 && consecutiveLossCount >= 10)
+            {
+                logger.LogWarning("UDP Connection seems to be blocked. 10 consecutive packets lost with 0 received. Aborting test.");
+                break;
+            }
+
             // Sleep 50ms (Simulate 100Hz tick rate)
             await Task.Delay(10);
         }
