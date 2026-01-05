@@ -25,7 +25,7 @@ dotnet tool install --global Aiursoft.NetworkTest
 After getting the binary, run it directly in the terminal.
 
 ```bash
-$ networkTest quality all
+$ network-test quality all
 ```
 
 That's it!
