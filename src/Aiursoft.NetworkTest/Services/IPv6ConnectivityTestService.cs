@@ -13,26 +13,6 @@ public class IPv6ConnectivityTestService : ITestService
 
     public string TestName => "IPv6 Connectivity";
 
-    // IPv4-only endpoints (no AAAA records)
-    private readonly List<string> _ipv4OnlyEndpoints = new()
-    {
-        "https://ipv4.icanhazip.com",
-        "https://v4.ident.me",
-        "https://ipv4.wtfismyip.com/text",
-        "https://api.ipify.org",
-        "https://checkip.amazonaws.com"
-    };
-
-    // IPv6-only endpoints (no A records)
-    private readonly List<string> _ipv6OnlyEndpoints = new()
-    {
-        "https://ipv6.icanhazip.com",
-        "https://v6.ident.me",
-        "https://ipv6.wtfismyip.com/text",
-        "https://api6.ipify.org",
-        "https://v6.test-ipv6.com/ip/"
-    };
-
     // IP detection endpoints that return the client's IP (in order of preference, will try with fallback)
     private readonly List<(string url, string format)> _ipv4DetectionEndpoints = new()
     {
@@ -68,40 +48,108 @@ public class IPv6ConnectivityTestService : ITestService
         var results = new List<ConnectivityTestResult>();
         double totalScore = 0;
 
-        // Test 1: IPv4 connectivity
-        var (ipv4Score, ipv4Success, ipv4Total) = await TestIPv4ConnectivityAsync(verbose);
-        totalScore += ipv4Score;
+        // 1. IPv4 Ping Baidu
+        var (p4BaiduScore, p4BaiduSuccess, p4BaiduNote) = await TestPingAsync("www.baidu.com", AddressFamily.InterNetwork, verbose);
+        totalScore += p4BaiduScore;
         results.Add(new ConnectivityTestResult
         {
-            TestName = "IPv4 Connectivity",
-            SuccessfulEndpoints = ipv4Success,
-            TotalEndpoints = ipv4Total,
-            Score = ipv4Score,
-            DetectedIP = null,
-            HasPublicIP = false,
-            Notes = ipv4Success >= 2 ? "Can access IPv4 internet" : "Cannot access IPv4 internet"
+            TestName = "IPv4 Ping Baidu",
+            SuccessfulEndpoints = p4BaiduSuccess ? 1 : 0,
+            TotalEndpoints = 1,
+            Score = p4BaiduScore,
+            Notes = p4BaiduNote
         });
 
-        // Test 2: IPv6 connectivity
-        var (ipv6Score, ipv6Success, ipv6Total) = await TestIPv6ConnectivityAsync(verbose);
-        totalScore += ipv6Score;
+        // 2. IPv6 Ping Baidu
+        var (p6BaiduScore, p6BaiduSuccess, p6BaiduNote) = await TestPingAsync("www.baidu.com", AddressFamily.InterNetworkV6, verbose);
+        totalScore += p6BaiduScore;
         results.Add(new ConnectivityTestResult
         {
-            TestName = "IP Connectivity",
-            SuccessfulEndpoints = ipv6Success,
-            TotalEndpoints = ipv6Total,
-            Score = ipv6Score,
-            DetectedIP = null,
-            HasPublicIP = false,
-            Notes = ipv6Success >= 2 ? "Can access IPv6 internet" : "Cannot access IPv6 internet"
+            TestName = "IPv6 Ping Baidu",
+            SuccessfulEndpoints = p6BaiduSuccess ? 1 : 0,
+            TotalEndpoints = 1,
+            Score = p6BaiduScore,
+            Notes = p6BaiduNote
         });
 
-        // Test 3: IPv4 public IP detection (NAT check)
+        // 3. IPv4 Ping Google
+        var (p4GoogleScore, p4GoogleSuccess, p4GoogleNote) = await TestPingAsync("www.google.com", AddressFamily.InterNetwork, verbose);
+        totalScore += p4GoogleScore;
+        results.Add(new ConnectivityTestResult
+        {
+            TestName = "IPv4 Ping Google",
+            SuccessfulEndpoints = p4GoogleSuccess ? 1 : 0,
+            TotalEndpoints = 1,
+            Score = p4GoogleScore,
+            Notes = p4GoogleNote
+        });
+
+        // 4. IPv6 Ping Google
+        var (p6GoogleScore, p6GoogleSuccess, p6GoogleNote) = await TestPingAsync("www.google.com", AddressFamily.InterNetworkV6, verbose);
+        totalScore += p6GoogleScore;
+        results.Add(new ConnectivityTestResult
+        {
+            TestName = "IPv6 Ping Google",
+            SuccessfulEndpoints = p6GoogleSuccess ? 1 : 0,
+            TotalEndpoints = 1,
+            Score = p6GoogleScore,
+            Notes = p6GoogleNote
+        });
+
+        // 5. IPv4 HTTP Baidu
+        var (h4BaiduScore, h4BaiduSuccess, h4BaiduNote) = await TestHttpAsync("www.baidu.com", "IPv4ConnectivityTest", verbose);
+        totalScore += h4BaiduScore;
+        results.Add(new ConnectivityTestResult
+        {
+            TestName = "IPv4 HTTP Baidu",
+            SuccessfulEndpoints = h4BaiduSuccess ? 1 : 0,
+            TotalEndpoints = 1,
+            Score = h4BaiduScore,
+            Notes = h4BaiduNote
+        });
+
+        // 6. IPv6 HTTP Baidu
+        var (h6BaiduScore, h6BaiduSuccess, h6BaiduNote) = await TestHttpAsync("www.baidu.com", "IPv6ConnectivityTest", verbose);
+        totalScore += h6BaiduScore;
+        results.Add(new ConnectivityTestResult
+        {
+            TestName = "IPv6 HTTP Baidu",
+            SuccessfulEndpoints = h6BaiduSuccess ? 1 : 0,
+            TotalEndpoints = 1,
+            Score = h6BaiduScore,
+            Notes = h6BaiduNote
+        });
+
+        // 7. IPv4 HTTP Google
+        var (h4GoogleScore, h4GoogleSuccess, h4GoogleNote) = await TestHttpAsync("www.google.com", "IPv4ConnectivityTest", verbose);
+        totalScore += h4GoogleScore;
+        results.Add(new ConnectivityTestResult
+        {
+            TestName = "IPv4 HTTP Google",
+            SuccessfulEndpoints = h4GoogleSuccess ? 1 : 0,
+            TotalEndpoints = 1,
+            Score = h4GoogleScore,
+            Notes = h4GoogleNote
+        });
+
+        // 8. IPv6 HTTP Google
+        var (h6GoogleScore, h6GoogleSuccess, h6GoogleNote) = await TestHttpAsync("www.google.com", "IPv6ConnectivityTest", verbose);
+        totalScore += h6GoogleScore;
+        results.Add(new ConnectivityTestResult
+        {
+            TestName = "IPv6 HTTP Google",
+            SuccessfulEndpoints = h6GoogleSuccess ? 1 : 0,
+            TotalEndpoints = 1,
+            Score = h6GoogleScore,
+            Notes = h6GoogleNote
+        });
+
+        // 9. IPv4 public IP detection (NAT check)
         var (ipv4NATScore, ipv4IP, ipv4HasPublic) = await TestIPv4PublicIPAsync(verbose);
         totalScore += ipv4NATScore;
         var ipv4Notes = ipv4HasPublic 
             ? $"Seems {ipv4IP} is your public IPv4" 
-            : "Is this machine behind proxy?";
+            : "Is this machine behind NAT?";
         results.Add(new ConnectivityTestResult
         {
             TestName = "IPv4 Public IP",
@@ -113,12 +161,12 @@ public class IPv6ConnectivityTestService : ITestService
             Notes = ipv4Notes
         });
 
-        // Test 4: IPv6 public IP detection (NAT check)
+        // 10. IPv6 public IP detection (NAT check)
         var (ipv6NATScore, ipv6IP, ipv6HasPublic) = await TestIPv6PublicIPAsync(verbose);
         totalScore += ipv6NATScore;
         var ipv6Notes = ipv6HasPublic 
             ? $"Seems {ipv6IP} is your public IPv6" 
-            : "Is this machine behind proxy?";
+            : "Is this machine behind NAT?";
         results.Add(new ConnectivityTestResult
         {
             TestName = "IPv6 Public IP",
@@ -138,102 +186,102 @@ public class IPv6ConnectivityTestService : ITestService
         return totalScore;
     }
 
-    private async Task<(double score, int successCount, int totalCount)> TestIPv4ConnectivityAsync(bool verbose)
+    private async Task<(double score, bool success, string note)> TestPingAsync(string host, AddressFamily family, bool verbose)
     {
         if (verbose)
         {
-            Console.WriteLine("Testing IPv4 connectivity...");
+            Console.WriteLine($"Testing {family} Ping to {host}...");
         }
 
-        var successCount = 0;
-
-        foreach (var endpoint in _ipv4OnlyEndpoints)
+        try
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("IPv4ConnectivityTest");
-                var response = await client.GetAsync(endpoint);
-                
-                if (response.IsSuccessStatusCode)
-                {
-                    successCount++;
-                    if (verbose)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"  ✓ {endpoint}");
-                        Console.ResetColor();
-                    }
-                }
-                else if (verbose)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"  ! {endpoint} - Status: {response.StatusCode}");
-                    Console.ResetColor();
-                }
-            }
-            catch (Exception ex)
+            var ips = await Dns.GetHostAddressesAsync(host);
+            var targetIp = ips.FirstOrDefault(ip => ip.AddressFamily == family);
+            if (targetIp == null)
             {
                 if (verbose)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"  ✗ {endpoint} - {ex.Message}");
+                    Console.WriteLine($"  ✗ No {family} address found for {host}");
                     Console.ResetColor();
                 }
+                return (0, false, $"No {family} address found");
             }
-        }
 
-        // +25 points if 2 or more endpoints are accessible
-        var score = successCount >= 2 ? 25.0 : 0.0;
-        return (score, successCount, _ipv4OnlyEndpoints.Count);
+            using var ping = new Ping();
+            var reply = await ping.SendPingAsync(targetIp, 2000);
+            if (reply.Status == IPStatus.Success)
+            {
+                if (verbose)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"  ✓ Ping {host} ({targetIp}) success: {reply.RoundtripTime}ms");
+                    Console.ResetColor();
+                }
+                return (10, true, $"{reply.RoundtripTime}ms");
+            }
+
+            if (verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"  ✗ Ping {host} ({targetIp}) failed: {reply.Status}");
+                Console.ResetColor();
+            }
+            return (0, false, reply.Status.ToString());
+        }
+        catch (Exception ex)
+        {
+            if (verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"  ✗ Ping {host} failed: {ex.Message}");
+                Console.ResetColor();
+            }
+            return (0, false, "Error");
+        }
     }
 
-    private async Task<(double score, int successCount, int totalCount)> TestIPv6ConnectivityAsync(bool verbose)
+    private async Task<(double score, bool success, string note)> TestHttpAsync(string host, string clientName, bool verbose)
     {
+        var url = $"https://{host}";
         if (verbose)
         {
-            Console.WriteLine("Testing IP connectivity...");
+            Console.WriteLine($"Testing {clientName} HTTP GET to {url}...");
         }
 
-        var successCount = 0;
-
-        foreach (var endpoint in _ipv6OnlyEndpoints)
+        try
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("IPv6ConnectivityTest");
-                var response = await client.GetAsync(endpoint);
-                
-                if (response.IsSuccessStatusCode)
-                {
-                    successCount++;
-                    if (verbose)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"  ✓ {endpoint}");
-                        Console.ResetColor();
-                    }
-                }
-                else if (verbose)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"  ! {endpoint} - Status: {response.StatusCode}");
-                    Console.ResetColor();
-                }
-            }
-            catch (Exception ex)
+            var client = _httpClientFactory.CreateClient(clientName);
+            var response = await client.GetAsync(url);
+            if (response.IsSuccessStatusCode)
             {
                 if (verbose)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"  ✗ {endpoint} - {ex.Message}");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"  ✓ HTTP GET {url} success: {response.StatusCode}");
                     Console.ResetColor();
                 }
+                return (10, true, "Success");
             }
-        }
 
-        // +25 points if 2 or more endpoints are accessible
-        var score = successCount >= 2 ? 25.0 : 0.0;
-        return (score, successCount, _ipv6OnlyEndpoints.Count);
+            if (verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"  ! HTTP GET {url} failed: {response.StatusCode}");
+                Console.ResetColor();
+            }
+            return (0, false, response.StatusCode.ToString());
+        }
+        catch (Exception ex)
+        {
+            if (verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"  ✗ HTTP GET {url} failed: {ex.Message}");
+                Console.ResetColor();
+            }
+            return (0, false, "Error");
+        }
     }
 
     private async Task<(double score, string? detectedIP, bool hasPublicIP)> TestIPv4PublicIPAsync(bool verbose)
@@ -319,7 +367,7 @@ public class IPv6ConnectivityTestService : ITestService
                 Console.WriteLine($"  ✓ Match found! Public IPv4 detected (no NAT)");
                 Console.ResetColor();
             }
-            return (25.0, serverSeenIP, true);
+            return (10.0, serverSeenIP, true);
         }
         else
         {
@@ -416,7 +464,7 @@ public class IPv6ConnectivityTestService : ITestService
                 Console.WriteLine($"  ✓ Match found! Public IPv6 detected (no NAT)");
                 Console.ResetColor();
             }
-            return (25.0, serverSeenIP, true);
+            return (10.0, serverSeenIP, true);
         }
         else
         {
