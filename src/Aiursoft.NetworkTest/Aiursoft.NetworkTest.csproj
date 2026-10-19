@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.46</Version>
+    <Version>10.0.47</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>network-test</AssemblyName>
     <RootNamespace>Aiursoft.NetworkTest</RootNamespace>
@@ -18,9 +18,9 @@
     <PackageId>Aiursoft.NetworkTest</PackageId>
     <PackageTags>nuget package dotnet csproj networkTest</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/networkTest</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/AiursoftWeb/networktest</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/networkTest.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/AiursoftWeb/networktest.git</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>

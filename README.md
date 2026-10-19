@@ -1,6 +1,6 @@
 # NetworkTest
 
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.com/aiursoft/networkTest/-/blob/master/LICENSE)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AiursoftWeb/networktest/blob/master/LICENSE)
 [![Pipeline stat](https://gitlab.aiursoft.com/aiursoft/networkTest/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/networkTest/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.com/aiursoft/networkTest/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/networkTest/-/pipelines)
 [![NuGet version (Aiursoft.NetworkTest)](https://img.shields.io/nuget/v/Aiursoft.NetworkTest.svg)](https://www.nuget.org/packages/Aiursoft.NetworkTest/)
