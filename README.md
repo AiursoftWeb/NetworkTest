@@ -3,6 +3,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AiursoftWeb/networktest/blob/master/LICENSE)
 [![Pipeline stat](https://gitlab.aiursoft.com/aiursoft/networkTest/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/networkTest/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.com/aiursoft/networkTest/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/networkTest/-/pipelines)
+[![S360 compliance](https://s360.aiursoft.com/badge.svg?project=aiursoft%2Fnetworktest)](https://s360.aiursoft.com/SupplyChain?tab=projects&project=aiursoft%2Fnetworktest&scope=baseline&ecosystem=all)
 [![NuGet version (Aiursoft.NetworkTest)](https://img.shields.io/nuget/v/Aiursoft.NetworkTest.svg)](https://www.nuget.org/packages/Aiursoft.NetworkTest/)
 [![Man hours](https://manhours.aiursoft.com/r/github.com/aiursoftweb/networkTest.svg)](https://manhours.aiursoft.com/r/github.com/aiursoftweb/networkTest.html)
 
