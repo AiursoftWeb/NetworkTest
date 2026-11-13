@@ -1,3 +1,4 @@
+using System.Globalization;
 using Aiursoft.NetworkTest.Models;
 
 namespace Aiursoft.NetworkTest.Services;
@@ -66,7 +67,7 @@ public class TableRenderer
     {
         var color = GetLatencyColor(latency);
         Console.ForegroundColor = color;
-        Console.Write(latency.ToString("F2").PadLeft(width));
+        Console.Write(latency.ToString("F2", CultureInfo.CurrentCulture).PadLeft(width));
         Console.ResetColor();
     }
 
@@ -74,7 +75,7 @@ public class TableRenderer
     {
         var color = GetPercentageColor(percentage);
         Console.ForegroundColor = color;
-        Console.Write(percentage.ToString("F1").PadLeft(width));
+        Console.Write(percentage.ToString("F1", CultureInfo.CurrentCulture).PadLeft(width));
         Console.ResetColor();
     }
 
@@ -146,7 +147,7 @@ public class TableRenderer
     {
         var color = GetScoreColor(score);
         Console.ForegroundColor = color;
-        Console.Write(score.ToString("F2").PadLeft(width));
+        Console.Write(score.ToString("F2", CultureInfo.CurrentCulture).PadLeft(width));
         Console.ResetColor();
     }
 
@@ -213,7 +214,7 @@ public class TableRenderer
 
         // Score
         Console.ForegroundColor = statusColor;
-        Console.Write(result.Score.ToString("F2").PadLeft(10));
+        Console.Write(result.Score.ToString("F2", CultureInfo.CurrentCulture).PadLeft(10));
         Console.ResetColor();
         Console.Write(" | ");
 
